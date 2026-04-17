@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cesim GlobalChallenge — Guía por Ronda</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f1923;
+      color: #e0e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0d7c8f, #0a5a6e);
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #14a8c0;
+    }
+    header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.5px; }
+    header p { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
+    .badge {
+      background: #14a8c0;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      min-height: calc(100vh - 90px);
+    }
+
+    /* ── LEFT PANEL: wheel ── */
+    .wheel-panel {
+      background: #131f2b;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-right: 1px solid #1e3040;
+    }
+    .wheel-panel h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #5ba3b8;
+      margin-bottom: 20px;
+    }
+
+    .wheel-wrap {
+      position: relative;
+      width: 280px;
+      height: 280px;
+    }
+    .wheel-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0d7c8f, #0a5a6e);
+      border: 2px solid #14a8c0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      z-index: 10;
+      cursor: default;
+    }
+    .wheel-center span { font-size: 1.4rem; display: block; }
+
+    /* step buttons around the wheel */
+    .step-btn {
+      position: absolute;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 2px solid #1e3040;
+      background: #1a2d3e;
+      color: #7ecde0;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+    }
+    .step-btn:hover, .step-btn.active {
+      background: #14a8c0;
+      border-color: #14a8c0;
+      color: #fff;
+      box-shadow: 0 0 16px rgba(20,168,192,0.5);
+    }
+
+    /* step list below wheel */
+    .step-list {
+      width: 100%;
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.18s;
+    }
+    .step-item:hover, .step-item.active {
+      background: #1a2d3e;
+      border-color: #14a8c0;
+    }
+    .step-item.active .step-num { background: #14a8c0; color: #fff; }
+    .step-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #1e3a4f;
+      color: #14a8c0;
+      font-weight: 700;
+      font-size: 0.78rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-label { font-size: 0.82rem; color: #b0ccd8; }
+    .step-item.active .step-label { color: #e0f0f7; }
+
+    /* ── RIGHT PANEL: detail ── */
+    .detail-panel {
+      padding: 36px 44px;
+      overflow-y: auto;
+    }
+
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      opacity: 0.6;
+    }
+    .welcome .icon { font-size: 4rem; margin-bottom: 16px; }
+    .welcome p { font-size: 1rem; line-height: 1.7; max-width: 420px; }
+
+    .step-detail { display: none; }
+    .step-detail.visible { display: block; }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .step-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #14a8c0, #0a5a6e);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .step-header h2 { font-size: 1.4rem; font-weight: 700; color: #e8f4f8; }
+    .step-header p { font-size: 0.84rem; color: #7ab5c8; margin-top: 3px; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: #131f2b;
+      border: 1px solid #1e3040;
+      border-radius: 12px;
+      padding: 18px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #2e6a7e; }
+    .card h3 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #14a8c0;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .card ul { list-style: none; }
+    .card ul li {
+      font-size: 0.84rem;
+      color: #b0ccd8;
+      padding: 4px 0;
+      border-bottom: 1px solid #1a2d3e;
+      line-height: 1.5;
+    }
+    .card ul li:last-child { border-bottom: none; }
+    .card ul li::before { content: "→ "; color: #14a8c0; }
+
+    .tip-box {
+      background: linear-gradient(135deg, #0d3a4a, #0a2535);
+      border: 1px solid #14a8c0;
+      border-left: 4px solid #14a8c0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .tip-box h4 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #14a8c0;
+      margin-bottom: 8px;
+    }
+    .tip-box p {
+      font-size: 0.86rem;
+      color: #c0dde8;
+      line-height: 1.6;
+    }
+
+    .warning-box {
+      background: #1a1a0a;
+      border: 1px solid #c8a22a;
+      border-left: 4px solid #c8a22a;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .warning-box h4 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #c8a22a;
+      margin-bottom: 8px;
+    }
+    .warning-box p {
+      font-size: 0.86rem;
+      color: #d8c888;
+      line-height: 1.6;
+    }
+
+    .kpi-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .kpi {
+      background: #131f2b;
+      border: 1px solid #1e3040;
+      border-radius: 10px;
+      padding: 14px 18px;
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+    .kpi .val {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #14a8c0;
+      display: block;
+    }
+    .kpi .lbl {
+      font-size: 0.74rem;
+      color: #7ab5c8;
+      margin-top: 3px;
+      display: block;
+    }
+
+    /* nav buttons */
+    .nav-btns {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #1e3040;
+    }
+    .nav-btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: 1px solid #2e6a7e;
+      background: transparent;
+      color: #7ecde0;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: #14a8c0;
+      border-color: #14a8c0;
+      color: #fff;
+    }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .nav-btn.primary {
+      background: #14a8c0;
+      border-color: #14a8c0;
+      color: #fff;
+    }
+    .nav-btn.primary:hover { background: #0d8fa5; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      .wheel-panel { border-right: none; border-bottom: 1px solid #1e3040; }
+      .detail-panel { padding: 24px 20px; }
+    }
+
+    /* ── XLS ANALYZER ── */
+    .step-item.xls-item { border-top: 1px solid #1e3040; margin-top: 8px; padding-top: 14px; }
+    .step-item.xls-item .step-num { background: #1a3a1a; color: #4ec94e; }
+    .step-item.xls-item.active .step-num { background: #4ec94e; color: #0a1a0a; }
+    .step-item.xls-item:hover, .step-item.xls-item.active { border-color: #4ec94e; background: #0f2010; }
+
+    .drop-zone {
+      border: 2px dashed #2e6a7e;
+      border-radius: 14px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #0c1a26;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #4ec94e;
+      background: #0a1f10;
+    }
+    .drop-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-zone .dz-icon { font-size: 2.8rem; margin-bottom: 12px; display: block; }
+    .drop-zone .dz-title { font-size: 1rem; font-weight: 600; color: #b0ccd8; margin-bottom: 6px; }
+    .drop-zone .dz-sub { font-size: 0.8rem; color: #5a8a9a; }
+
+    .sheet-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .sheet-tab {
+      padding: 6px 14px; border-radius: 6px; border: 1px solid #1e3040;
+      background: #131f2b; color: #7ab5c8; font-size: 0.78rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sheet-tab:hover, .sheet-tab.active {
+      background: #14a8c0; border-color: #14a8c0; color: #fff;
+    }
+
+    .data-table-wrap {
+      overflow-x: auto; border-radius: 10px; border: 1px solid #1e3040; margin-bottom: 24px;
+      max-height: 320px; overflow-y: auto;
+    }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .data-table th {
+      background: #0d7c8f; color: #fff; padding: 8px 12px;
+      text-align: left; position: sticky; top: 0; white-space: nowrap;
+    }
+    .data-table td {
+      padding: 6px 12px; border-bottom: 1px solid #1a2d3e; color: #c0d8e4;
+      white-space: nowrap;
+    }
+    .data-table tr:hover td { background: #1a2d3e; }
+    .data-table td.num { text-align: right; font-family: monospace; }
+    .data-table td.pos { color: #4ec94e; }
+    .data-table td.neg { color: #e05a5a; }
+
+    /* ── INPUTS BOX ── */
+    .inputs-box {
+      background: #09161f;
+      border: 1px solid #1a4a5a;
+      border-left: 4px solid #0d7c8f;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .inputs-box h4 {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px;
+      color: #0d7c8f; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .inputs-table {
+      width: 100%; border-collapse: collapse; font-size: 0.8rem;
+    }
+    .inputs-table tr { border-bottom: 1px solid #1a2d3e; }
+    .inputs-table tr:last-child { border-bottom: none; }
+    .inputs-table td { padding: 6px 8px; vertical-align: top; line-height: 1.45; }
+    .inputs-table td:first-child {
+      color: #c0d8e4; font-weight: 600; width: 38%; white-space: nowrap;
+    }
+    .inputs-table td:last-child { color: #5ab8cc; }
+    .nav-path {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-family: monospace; font-size: 0.75rem;
+    }
+    .nav-path .seg {
+      background: #0d3040; color: #7ecde0; padding: 2px 7px;
+      border-radius: 4px; border: 1px solid #1a4a5a;
+    }
+    .nav-path .arr { color: #2a6a7e; font-size: 0.7rem; }
+
+    .insights-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .insight-card {
+      border-radius: 12px; padding: 14px 16px;
+      border: 1px solid #1e3040; background: #131f2b;
+    }
+    .insight-card.good  { border-left: 4px solid #4ec94e; }
+    .insight-card.bad   { border-left: 4px solid #e05a5a; }
+    .insight-card.warn  { border-left: 4px solid #c8a22a; }
+    .insight-card.info  { border-left: 4px solid #14a8c0; }
+    .insight-card .ic-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+      color: #5a8a9a; margin-bottom: 6px;
+    }
+    .insight-card .ic-val {
+      font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .insight-card.good  .ic-val { color: #4ec94e; }
+    .insight-card.bad   .ic-val { color: #e05a5a; }
+    .insight-card.warn  .ic-val { color: #c8a22a; }
+    .insight-card.info  .ic-val { color: #14a8c0; }
+    .insight-card .ic-desc { font-size: 0.78rem; color: #7ab5c8; line-height: 1.5; }
+
+    .rec-list { list-style: none; margin-bottom: 24px; }
+    .rec-list li {
+      padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
+      font-size: 0.84rem; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .rec-list li.good  { background: #0a1f10; border: 1px solid #2a5a2a; color: #9ee89e; }
+    .rec-list li.bad   { background: #1f0a0a; border: 1px solid #5a2a2a; color: #e89e9e; }
+    .rec-list li.warn  { background: #1a180a; border: 1px solid #5a4a0a; color: #e8d09e; }
+    .rec-list li.info  { background: #0a1a2a; border: 1px solid #0a4a6a; color: #9ed8e8; }
+    .rec-list li .rec-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    .xls-section-title {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #5a8a9a; margin: 20px 0 10px;
+    }
+    #xls-filename {
+      font-size: 0.82rem; color: #4ec94e; margin-bottom: 16px;
+      padding: 8px 12px; background: #0a1f10; border-radius: 6px; display: none;
+    }
+
+    /* ── COMPETITOR INTEL ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .team-card {
+      border-radius: 12px; border: 1px solid #1e3040;
+      background: #0e1c2a; overflow: hidden;
+    }
+    .team-card-header {
+      padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+    .team-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+    .team-card-body { padding: 4px 0 10px; }
+    .team-metric {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 16px; font-size: 0.8rem; border-bottom: 1px solid #12202e;
+    }
+    .team-metric:last-child { border-bottom: none; }
+    .tm-label { color: #7ab5c8; }
+    .tm-val { font-family: monospace; font-weight: 600; color: #dde8f0; }
+    .tm-bar-wrap { flex: 1; margin: 0 10px; height: 5px; background: #1a2d3e; border-radius: 3px; }
+    .tm-bar { height: 100%; border-radius: 3px; transition: width 0.4s; }
+    .team-card-tags { padding: 8px 14px; display: flex; flex-wrap: wrap; gap: 5px; }
+    .tag {
+      font-size: 0.68rem; padding: 3px 9px; border-radius: 20px; font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .tag.red    { background: #3a1010; color: #e88; border: 1px solid #5a2020; }
+    .tag.green  { background: #0a2010; color: #8e8; border: 1px solid #1a4a1a; }
+    .tag.yellow { background: #2a1f00; color: #dd9; border: 1px solid #4a3a00; }
+    .tag.blue   { background: #081828; color: #8ce; border: 1px solid #0a3a5a; }
+
+    .comp-summary {
+      background: #0b1822; border: 1px solid #1e3040; border-radius: 12px;
+      padding: 18px 20px; margin-bottom: 20px;
+    }
+    .comp-summary h4 {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #5a8a9a; margin-bottom: 12px;
+    }
+    .comp-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .comp-table th {
+      text-align: left; padding: 6px 10px; color: #5a8a9a;
+      border-bottom: 1px solid #1a2d3e; font-weight: 600;
+    }
+    .comp-table td {
+      padding: 6px 10px; border-bottom: 1px solid #12202e; color: #c0d8e4;
+      font-family: monospace;
+    }
+    .comp-table tr:hover td { background: #111e2a; }
+    .comp-table td.best  { color: #4ec94e; font-weight: 700; }
+    .comp-table td.worst { color: #e05a5a; }
+    .comp-table td.name  { font-family: inherit; color: #e0eef7; font-weight: 600; }
+
+    .spy-box {
+      background: #080f18; border: 1px solid #1e3040; border-left: 3px solid #c8a22a;
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 10px;
+    }
+    .spy-box .spy-team {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+      color: #c8a22a; margin-bottom: 6px; font-weight: 700;
+    }
+    .spy-box .spy-text { font-size: 0.83rem; color: #d0c488; line-height: 1.6; }
+    .spy-box .spy-action {
+      margin-top: 8px; font-size: 0.8rem; color: #e8e0a0;
+      border-top: 1px solid #2a2010; padding-top: 8px;
+    }
+    .spy-box .spy-action::before { content: "→ Tu respuesta: "; color: #14a8c0; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Cesim GlobalChallenge — Guía de Decisiones</h1>
+    <p>Mobilé Inc · IESE EMBA-BCN-2027 · Competitive Strategy WK</p>
+  </div>
+  <div class="badge">9 pasos · Por ronda</div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT: navigation -->
+  <div class="wheel-panel">
+    <h2>Flujo de decisión</h2>
+
+    <div class="wheel-wrap">
+      <!-- center -->
+      <div class="wheel-center">
+        <span>🎯</span>
+        Strategic<br>Intent
+      </div>
+      <!-- 9 buttons placed around the circle -->
+      <!-- angles: step 1=top-right, going clockwise -->
+    </div>
+
+    <div class="step-list">
+      <div class="step-item" onclick="showStep(0)" id="item-0">
+        <div class="step-num">0</div>
+        <div class="step-label">Analizar resultados anteriores</div>
+      </div>
+      <div class="step-item" onclick="showStep(1)" id="item-1">
+        <div class="step-num">1</div>
+        <div class="step-label">Market Conditions</div>
+      </div>
+      <div class="step-item" onclick="showStep(2)" id="item-2">
+        <div class="step-num">2</div>
+        <div class="step-label">Demand</div>
+      </div>
+      <div class="step-item" onclick="showStep(3)" id="item-3">
+        <div class="step-num">3</div>
+        <div class="step-label">Production</div>
+      </div>
+      <div class="step-item" onclick="showStep(4)" id="item-4">
+        <div class="step-num">4</div>
+        <div class="step-label">Investments & HR</div>
+      </div>
+      <div class="step-item" onclick="showStep(5)" id="item-5">
+        <div class="step-num">5</div>
+        <div class="step-label">R&D</div>
+      </div>
+      <div class="step-item" onclick="showStep(6)" id="item-6">
+        <div class="step-num">6</div>
+        <div class="step-label">Marketing</div>
+      </div>
+      <div class="step-item" onclick="showStep(7)" id="item-7">
+        <div class="step-num">7</div>
+        <div class="step-label">Logistics</div>
+      </div>
+      <div class="step-item" onclick="showStep(8)" id="item-8">
+        <div class="step-num">8</div>
+        <div class="step-label">Tax Planning</div>
+      </div>
+      <div class="step-item" onclick="showStep(9)" id="item-9">
+        <div class="step-num">9</div>
+        <div class="step-label">Finance & Budgets</div>
+      </div>
+      <div class="step-item xls-item" onclick="showStep(10)" id="item-10">
+        <div class="step-num">📥</div>
+        <div class="step-label">Análisis XLS de Ronda</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: detail -->
+  <div class="detail-panel" id="detail-panel">
+
+    <!-- Welcome -->
+    <div class="welcome" id="welcome-screen">
+      <div class="icon">🗺️</div>
+      <p>Selecciona un paso del menú para ver los puntos clave que debes tener en cuenta en cada ronda.</p>
+    </div>
+
+    <!-- STEP 0 -->
+    <div class="step-detail" id="step-0">
+      <div class="step-header">
+        <div class="step-icon">📊</div>
+        <div>
+          <h2>Paso 0 · Analizar resultados anteriores</h2>
+          <p>Siempre antes de tomar decisiones nuevas</p>
+        </div>
+      </div>
+      <div class="tip-box">
+        <h4>Por qué es crítico</h4>
+        <p>Los resultados del round anterior revelan cómo reaccionó el mercado a tus decisiones y las de la competencia. Sin este análisis, las decisiones nuevas son ciegos.</p>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Dónde encontrar los datos en Cesim</h4>
+        <table class="inputs-table">
+          <tr><td>TSR + precio acción</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span> — filas "Cumulative Shareholder Return" y "Share Price"</td></tr>
+          <tr><td>P&L (ventas, EBIT, beneficio)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — Global view</td></tr>
+          <tr><td>Balance (deuda, equity ratio)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Balance Sheet</span></span></td></tr>
+          <tr><td>Cuota de mercado por región</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span> — filtrar por tech y área</td></tr>
+          <tr><td>Demanda insatisfecha (lost sales)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Demand & Sales</span></span></td></tr>
+          <tr><td>Utilización de planta</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span> — columna "Capacity Utilization %"</td></tr>
+          <tr><td>Comparativa todos los equipos</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Firm Comparison</span></span> + botón <b>XLS</b> arriba a la derecha → importa aquí (Paso 📥)</td></tr>
+        </table>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>📈 Financiero</h3>
+          <ul>
+            <li>¿Cuál fue tu Shareholder Return vs. competidores?</li>
+            <li>¿Cómo evolucionó el precio de la acción?</li>
+            <li>¿Tu ROS, ROE y ROCE mejoran o empeoran?</li>
+            <li>¿Tienes pérdidas acumuladas (loss carryforward)?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🏪 Mercado</h3>
+          <ul>
+            <li>¿Ganaste o perdiste cuota de mercado?</li>
+            <li>¿Qué tecnología está ganando terreno?</li>
+            <li>¿Hubo demanda insatisfecha (lost sales)?</li>
+            <li>¿Qué mercado te da más margen?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🏭 Operativo</h3>
+          <ul>
+            <li>¿Tu utilización de planta fue óptima (~70-90%)?</li>
+            <li>¿Tuviste penalización por sobreestimar demanda?</li>
+            <li>¿Cómo está tu curva de aprendizaje vs. rivales?</li>
+            <li>¿Hay exceso de inventario?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔍 Competencia</h3>
+          <ul>
+            <li>¿Qué precios están poniendo los rivales?</li>
+            <li>¿Alguien ya tiene Tech superior?</li>
+            <li>¿Cuánto están invirtiendo en marketing?</li>
+            <li>¿Alguien está expandiéndose a nuevos mercados?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" disabled>← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(1)">Siguiente: Market Conditions →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step-detail" id="step-1">
+      <div class="step-header">
+        <div class="step-icon">🌍</div>
+        <div>
+          <h2>Paso 1 · Market Conditions</h2>
+          <p>Lee el outlook antes de cualquier otra decisión</p>
+        </div>
+      </div>
+      <div class="tip-box">
+        <h4>Consejo clave</h4>
+        <p>El outlook de mercado te da señales sobre costes, tipos de cambio, impuestos y crecimiento. Los parámetros cuantitativos son bastante fiables; el crecimiento real depende también de lo que haga la competencia.</p>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Dónde encontrar los datos en Cesim</h4>
+        <table class="inputs-table">
+          <tr><td>Outlook de mercado (texto)</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Market Outlook</span></span> — léelo entero, hay eventos macro ocultos</td></tr>
+          <tr><td>Cobertura de red por tecnología</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Network Coverage</span></span> — % cobertura por tech y ronda futura</td></tr>
+          <tr><td>Tasas impositivas por región</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Taxation</span></span></td></tr>
+          <tr><td>Tipos de cambio (EUR, Asia FX)</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Exchange Rates</span></span></td></tr>
+          <tr><td>Costes de transporte e importación</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Logistics</span></span> — tarifas por ruta</td></tr>
+          <tr><td>Coste de componentes / proveedor</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Component Suppliers</span></span></td></tr>
+          <tr><td>Previsión crecimiento de mercado</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Market Size</span></span> — unidades totales por región y tech</td></tr>
+        </table>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>📡 Network Coverage</h3>
+          <ul>
+            <li>Monitoriza el avance de cobertura de Tech 2, 3 y 4</li>
+            <li>Sin cobertura = sin demanda para esa tech</li>
+            <li>Planifica R&D con antelación a la cobertura</li>
+            <li>Hay hasta 4 tecnologías a lo largo del juego</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>💰 Costes & Finanzas</h3>
+          <ul>
+            <li>Revisa cambios en tarifas de importación</li>
+            <li>Tipos de cambio (EUR, Asia FX)</li>
+            <li>Tasas impositivas por región</li>
+            <li>Costes de transporte actualizados</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🌎 Mercados</h3>
+          <ul>
+            <li><b>USA</b>: crece 5–20% p.a., responde bien a publicidad</li>
+            <li><b>Europa</b>: crece ~10%, muy sensible a features</li>
+            <li><b>Asia</b>: crece ~20%, muy sensible al precio</li>
+            <li>Lee si hay eventos macro que alteren el outlook</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(0)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(2)">Siguiente: Demand →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-detail" id="step-2">
+      <div class="step-header">
+        <div class="step-icon">📉</div>
+        <div>
+          <h2>Paso 2 · Demand</h2>
+          <p>Estima el mercado total y tu cuota objetivo</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Tamaño total del mercado</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Market Size</span></span> — unidades por región y tech</td></tr>
+          <tr><td>Tasa de crecimiento prevista</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Market Outlook</span></span> + porcentajes en Parameters</td></tr>
+          <tr><td>Tu cuota histórica</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span> — últimas 2–3 rondas</td></tr>
+          <tr><td>Demanda real vs estimada anterior</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Demand & Sales</span></span> — compara tu estimación con lo real</td></tr>
+          <tr><td>Techs disponibles para vender</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Status</span></span> — qué techs tienes ya desarrolladas</td></tr>
+          <tr><td>Precios y features de rivales</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Competitor Info</span></span> — precios, features y promo por equipo</td></tr>
+        </table>
+      </div>
+      <div class="warning-box">
+        <h4>Ojo</h4>
+        <p>Tu estimación de cuota de mercado es sobre el total del mercado (todas las tecnologías), NO sobre la demanda de tu tecnología específica. Si estimas 20% y hay 4 competidores iguales, la estimación base sería 25% cada uno.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>📊 Crecimiento del mercado</h3>
+          <ul>
+            <li>Introduce el % de crecimiento esperado para cada región</li>
+            <li>Usa el outlook como base + ajusta según competencia</li>
+            <li>Mira el gráfico de demanda histórica por tecnología</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📱 Selección de producto</h3>
+          <ul>
+            <li>Máximo 2 productos por mercado</li>
+            <li>Solo puedes vender techs que ya hayas desarrollado</li>
+            <li>Plantéate cuándo pasar de Tech 1 a Tech 2</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🎯 Factores que mueven tu cuota</h3>
+          <ul>
+            <li>Precio (vs. competidores)</li>
+            <li>Promoción / publicidad</li>
+            <li>Número de features ofrecidas</li>
+            <li>Cuota del round anterior (inercia)</li>
+            <li>Atractivo de la tecnología en cada región</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🌏 Particularidades por mercado</h3>
+          <ul>
+            <li><b>Europa</b>: el más responsivo a features</li>
+            <li><b>USA</b>: muy responsivo a publicidad</li>
+            <li><b>Asia</b>: muy sensible al precio, menos a tech</li>
+            <li>Adáptate a cada mercado por separado</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(1)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(3)">Siguiente: Production →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-detail" id="step-3">
+      <div class="step-header">
+        <div class="step-icon">🏭</div>
+        <div>
+          <h2>Paso 3 · Production</h2>
+          <p>Asignación de capacidad y outsourcing</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Capacidad disponible por planta</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Plant Information</span></span> — capacidad total y líneas por planta (USA / Asia)</td></tr>
+          <tr><td>Demanda estimada (del paso 2)</td><td>Tu estimación de ventas por tech y mercado — base para decidir volumen de producción</td></tr>
+          <tr><td>Inventario actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Inventory</span></span> — stock disponible del round anterior</td></tr>
+          <tr><td>Coste unitario por planta/tech</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Production Plan</span></span> — se actualiza en tiempo real al asignar capacidad</td></tr>
+          <tr><td>Utilización ronda anterior</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span> — columna "Capacity Utilization %"</td></tr>
+          <tr><td>Proveedor de componentes activo</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Procurement</span></span> — proveedor seleccionado y coste por unidad</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">
+        <h4>Regla de oro</h4>
+        <p>El óptimo de coste está en ~70-90% de utilización de la planta (curva en U). Por debajo o por encima, los costes unitarios suben. Mejor perder alguna venta que producir con planta al 100% o sobreproducir.</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><span class="val">~3-5%</span><span class="lbl">Penalización por corte de producción</span></div>
+        <div class="kpi"><span class="val">70-90%</span><span class="lbl">Utilización óptima de planta</span></div>
+        <div class="kpi"><span class="val">2 líneas</span><span class="lbl">Por planta (USA / Asia)</span></div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>⚙️ Asignación de capacidad</h3>
+          <ul>
+            <li>Elige qué tecnología produce cada línea</li>
+            <li>Asigna % de capacidad a cada producto</li>
+            <li>2 líneas en USA + 2 líneas en Asia = 4 combinaciones posibles</li>
+            <li>Scrap % baja conforme maduras en esa tech (learning curve)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔄 Outsourcing</h3>
+          <ul>
+            <li>Permite flexibilidad sin esperar nuevas plantas</li>
+            <li>Pierdes beneficio de la curva de aprendizaje</li>
+            <li>Coste variable según volumen</li>
+            <li>Útil si la demanda supera tu capacidad propia</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📉 Curva de aprendizaje</h3>
+          <ul>
+            <li>Coste unitario baja con la producción acumulada global</li>
+            <li>Empieza pronto en la tech que sea estratégica</li>
+            <li>Asia tiene básicamente mayor coste inicial pero baja más rápido</li>
+            <li>El subcontratar rompe el aprendizaje</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>♻️ CSR / Procurement</h3>
+          <ul>
+            <li>Elige proveedores de componentes (rating ético + coste)</li>
+            <li>Mejor rating → mejor imagen → más demanda</li>
+            <li>Pide estudios para anticipar cambios en proveedores</li>
+            <li>Cambiar proveedor tiene coste de apertura</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(2)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(4)">Siguiente: Investments →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-detail" id="step-4">
+      <div class="step-header">
+        <div class="step-icon">🏗️</div>
+        <div>
+          <h2>Paso 4 · Investments & HR</h2>
+          <p>Plantas nuevas y recursos humanos</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Capacidad actual vs demanda futura</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Plant Information</span></span> + tu forecast de demanda próximas 2 rondas</td></tr>
+          <tr><td>Coste y disponibilidad de plantas</td><td><span class="nav-path"><span class="seg">Investments</span><span class="arr">›</span><span class="seg">Plant Investment</span></span> — precio, capacidad y ronda de disponibilidad</td></tr>
+          <tr><td>Utilización histórica</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span> — ¿estás al límite o con holgura?</td></tr>
+          <tr><td>Nº empleados R&D y salarios</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">Workforce Planning</span></span> — headcount, salario base y presupuesto formación</td></tr>
+          <tr><td>Eficiencia R&D actual</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">HR Results</span></span> — índice de eficiencia del equipo de desarrollo</td></tr>
+          <tr><td>Estructura financiera</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Cash Flow</span></span> — ¿tienes caja suficiente para invertir?</td></tr>
+        </table>
+      </div>
+      <div class="warning-box">
+        <h4>Timing de las plantas</h4>
+        <p>Una planta nueva puede tardar 1–2 rondas en estar disponible. Pagas a mitad del ciclo de inversión. Planifica con antelación — cuando necesites la capacidad, ya es tarde para invertir.</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><span class="val">~160M$</span><span class="lbl">Coste de una planta nueva</span></div>
+        <div class="kpi"><span class="val">550k u.</span><span class="lbl">Capacidad por planta</span></div>
+        <div class="kpi"><span class="val">15%</span><span class="lbl">Depreciación declining balance</span></div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>🏗️ Decisión de inversión</h3>
+          <ul>
+            <li>Estima demanda global para los próximos 2 rounds</li>
+            <li>Compara tu demanda futura vs. capacidad disponible</li>
+            <li>ROI de la planta: precio × margen × utilización</li>
+            <li>Posible desinversión (valor negativo en el campo)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📍 ¿USA o Asia?</h3>
+          <ul>
+            <li>USA: coste base más bajo al inicio, sin tarifa local</li>
+            <li>Asia: ventaja competitiva en coste a largo plazo</li>
+            <li>Europa: sin producción local (costes laborales altos)</li>
+            <li>Coordina con logística para minimizar transporte</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>👥 RRHH (si está habilitado)</h3>
+          <ul>
+            <li>Nº de empleados R&D, salario y presupuesto formación</li>
+            <li>Mayor salario + formación = menos rotación = más eficiencia</li>
+            <li>Eficiencia alta → más fácil desarrollar nuevas techs</li>
+            <li>Sincroniza con las decisiones de R&D del paso 5</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(3)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(5)">Siguiente: R&D →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-detail" id="step-5">
+      <div class="step-header">
+        <div class="step-icon">🔬</div>
+        <div>
+          <h2>Paso 5 · Research & Development</h2>
+          <p>Tecnologías y features — decisión estratégica central</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Estado de desarrollo por tech</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Development</span></span> — % completado de Tech 2/3/4 y coste restante</td></tr>
+          <tr><td>Cobertura de red futura</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Network Coverage</span></span> — cuándo llegará la cobertura de Tech 2/3</td></tr>
+          <tr><td>Coste de licencias disponibles</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Licensing</span></span> — precio de compra inmediata de cada tech</td></tr>
+          <tr><td>Features desarrolladas</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Product Features</span></span> — nº de features disponibles por tech y coste añadir más</td></tr>
+          <tr><td>R&D de rivales (señales)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Firm Comparison</span></span> — gasto R&D por equipo (o desde el XLS importado)</td></tr>
+          <tr><td>Eficiencia del equipo R&D</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">HR Results</span></span> — afecta a la velocidad de desarrollo in-house</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">
+        <h4>In-house vs. Licencias</h4>
+        <p>R&D propio: tarda <b>1 ronda</b> pero es más barato si es gradual. Licencia: disponible <b>inmediatamente</b>, pago único. Ambas son complementarias — puedes mezclarlas en la misma tecnología.</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><span class="val">~10%</span><span class="lbl">Gasto típico R&D / ventas</span></div>
+        <div class="kpi"><span class="val">1–10</span><span class="lbl">Features por tecnología</span></div>
+        <div class="kpi"><span class="val">1 ronda</span><span class="lbl">Delay R&D in-house</span></div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>💡 Desarrollo in-house</h3>
+          <ul>
+            <li>Resultado disponible en el siguiente round</li>
+            <li>Más económico si inviertes gradualmente</li>
+            <li>No reduce el coste de licencias para otros equipos</li>
+            <li>Monitoriza el gráfico "Development Progress"</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🛒 Compra de licencias</h3>
+          <ul>
+            <li>Disponible inmediatamente en este round</li>
+            <li>Pago único — no hay royalties futuros</li>
+            <li>Precio baja conforme la tech envejece</li>
+            <li>Ideal si vas tarde y necesitas ponerte al día</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📐 ¿Cuándo pasar a nueva tech?</h3>
+          <ul>
+            <li>Mira el forecast de cobertura de red (Demand page)</li>
+            <li>Sin cobertura de red = sin ventas de esa tech</li>
+            <li>Anticípate: empieza R&D 1-2 rounds antes del lanzamiento</li>
+            <li>Tech 1 → Tech 2 es el primer salto crítico del juego</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>✨ Features</h3>
+          <ul>
+            <li>Más features = más diferenciación = más cuota</li>
+            <li>Cada feature tiene un coste adicional por unidad</li>
+            <li>Europa valora más las features que Asia</li>
+            <li>Tienes que tener desarrollada la tech para añadir features</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(4)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(6)">Siguiente: Marketing →</button>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step-detail" id="step-6">
+      <div class="step-header">
+        <div class="step-icon">📣</div>
+        <div>
+          <h2>Paso 6 · Marketing</h2>
+          <p>Precio, features y promoción por producto y mercado</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Precios de rivales por mercado</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Competitor Info</span></span> — precio, features y promo de cada equipo</td></tr>
+          <tr><td>Tu cuota y ventas por mercado</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span> + Demand & Sales</td></tr>
+          <tr><td>Sensibilidad al precio/promo/features</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Elasticities</span></span> — elasticidades por región</td></tr>
+          <tr><td>Features disponibles para ofrecer</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Product Features</span></span> — solo puedes ofrecer las que ya tienes desarrolladas</td></tr>
+          <tr><td>Coste por feature adicional</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Feature Cost</span></span> — coste unitario por cada feature ofrecida</td></tr>
+          <tr><td>Donde introducir precio/promo</td><td><span class="nav-path"><span class="seg">Marketing</span><span class="arr">›</span><span class="seg">Prices & Promotion</span></span> — una fila por producto × mercado (hasta 6 combinaciones)</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">
+        <h4>Regla de promoción</h4>
+        <p>Regla de oro: <b>Presupuesto publicidad ≈ Margen bruto × elasticidad publicitaria (~0.1)</b>. Al lanzar un producto nuevo puede ser razonable gastar más. A largo plazo, la publicidad debe pagarse con el margen que genera el producto.</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><span class="val">3–5%</span><span class="lbl">Gasto típico marketing / ventas</span></div>
+        <div class="kpi"><span class="val">x3</span><span class="lbl">Decisiones por mercado (USA/Asia/EU)</span></div>
+        <div class="kpi"><span class="val">Largo plazo</span><span class="lbl">La publicidad tiene efecto acumulativo</span></div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>💲 Precio</h3>
+          <ul>
+            <li>Se fija en moneda local de cada área</li>
+            <li>Precio alto = más margen, menos cuota</li>
+            <li>Tech nueva se puede vender más cara que tech vieja</li>
+            <li>Asia es muy sensible al precio — cuidado con sobrepreciar</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>📢 Promoción</h3>
+          <ul>
+            <li>Efectos más altos en USA y Europa</li>
+            <li>Asia: responde menos, pero aun así importa</li>
+            <li>Tiene efecto a largo plazo — no recortes bruscamente</li>
+            <li>Más útil al lanzar un producto nuevo o ganar cuota</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>⭐ Features</h3>
+          <ul>
+            <li>Decide cuántas features implementas (1–10)</li>
+            <li>Coste: nº de features × feature cost (ver PARAMETERS)</li>
+            <li>Europa: alta sensibilidad a features</li>
+            <li>Solo puedes implementar features que ya tienes desarrolladas</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🎯 Estrategia por mercado</h3>
+          <ul>
+            <li><b>USA</b>: invierte en publicidad, precio medio-alto</li>
+            <li><b>Europa</b>: maximiza features, precio premium</li>
+            <li><b>Asia</b>: precio competitivo, volumen alto</li>
+            <li>Puedes tener estrategia diferenciada por mercado</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(5)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(7)">Siguiente: Logistics →</button>
+      </div>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="step-detail" id="step-7">
+      <div class="step-header">
+        <div class="step-icon">🚚</div>
+        <div>
+          <h2>Paso 7 · Logistics</h2>
+          <p>Prioridades de entrega y transfer prices</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Margen por mercado/tech</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Contribution Margin</span></span> — margen neto por unidad por mercado y tech</td></tr>
+          <tr><td>Volumen producido disponible</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Production Plan</span></span> — unidades totales disponibles para distribuir</td></tr>
+          <tr><td>Costes de transporte por ruta</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Logistics</span></span> — tarifa plana + ad valorem por ruta</td></tr>
+          <tr><td>Donde configurar prioridades</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Delivery Priorities</span></span> — asigna orden 1º/2º/3º por planta y producto</td></tr>
+          <tr><td>Transfer prices internos</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span> — multiplicador sobre coste (rango 1x–2x) para cada ruta intercompany</td></tr>
+          <tr><td>Beneficio por filial (para tax)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — vista por región (USA / Asia / Europa)</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">
+        <h4>Lógica de priorización</h4>
+        <p>Si no tienes suficiente oferta para todos los mercados, prioriza los mercados con <b>mayor margen unitario</b>. Así, cuando la oferta se queda corta, se cortan primero las ventas del mercado menos rentable.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>📦 Prioridades de entrega</h3>
+          <ul>
+            <li>Decides el orden (1º, 2º, 3º) para cada planta y tech</li>
+            <li>Si hay escasez, se corta primero el último de la lista</li>
+            <li>Ordena de mayor a menor margen neto por unidad</li>
+            <li>Recuerda: sin coste de transporte si produces y vendes en la misma región</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>💸 Costes de transporte</h3>
+          <ul>
+            <li>Transporte + tarifa aduanera (flat o ad valorem)</li>
+            <li>Ejemplo: USA→Asia o USA→Europa tiene coste extra</li>
+            <li>Ver tasas en PARAMETERS cada ronda</li>
+            <li>Tarifa USA→Asia se duplicó en el ejemplo (de $7 a $12)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔄 Transfer Prices</h3>
+          <ul>
+            <li>Multiplica el precio de coste (rango 1–2x)</li>
+            <li>Desplaza beneficios entre regiones con distinto impuesto</li>
+            <li>Se coordina con el Paso 8 (Tax planning)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(6)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(8)">Siguiente: Tax →</button>
+      </div>
+    </div>
+
+    <!-- STEP 8 -->
+    <div class="step-detail" id="step-8">
+      <div class="step-header">
+        <div class="step-icon">🧾</div>
+        <div>
+          <h2>Paso 8 · Tax Planning</h2>
+          <p>Transfer pricing para optimizar la carga fiscal</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Tipos impositivos por región</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Taxation</span></span> — USA ~38%, Asia ~19%, Europa ~31%</td></tr>
+          <tr><td>Beneficio antes de impuestos por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — selecciona vista por región</td></tr>
+          <tr><td>Transfer prices actuales</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span> — el mismo campo que en el paso 7 (son el mismo input)</td></tr>
+          <tr><td>Pérdidas acumuladas (carryforward)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — fila "Tax Loss Carryforward" por filial</td></tr>
+          <tr><td>Dónde ajustar transfer prices</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span> — rango permitido 1x–2x el coste unitario de producción</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">
+        <h4>Cómo funciona</h4>
+        <p>Ajustando los transfer prices (el precio al que las filiales se venden productos internamente) puedes desplazar beneficios a regiones con menores tipos impositivos. El rango permitido es <b>1x–2x</b> el coste unitario.</p>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>📊 Tipos impositivos</h3>
+          <ul>
+            <li>USA: ~38% | Asia: ~19% | Europa: ~31%</li>
+            <li>Asia suele tener el tipo más bajo — favorable</li>
+            <li>Revisa los tipos en PARAMETERS cada ronda</li>
+            <li>Loss carryforward reduce impuestos en rounds futuros</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔧 Transfer Pricing</h3>
+          <ul>
+            <li>Si Asia tiene menor impuesto, sube el TP de USA→Asia</li>
+            <li>También sirve para compartir costes de R&D entre filiales</li>
+            <li>Impacto visible en el cuadro de Taxation page</li>
+            <li>Coordina siempre con la sección de Logistics</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(7)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(9)">Siguiente: Finance →</button>
+      </div>
+    </div>
+
+    <!-- STEP 9 -->
+    <div class="step-detail" id="step-9">
+      <div class="step-header">
+        <div class="step-icon">💰</div>
+        <div>
+          <h2>Paso 9 · Finance & Budgets</h2>
+          <p>Deuda, dividendos, recompras y estructura de capital</p>
+        </div>
+      </div>
+      <div class="inputs-box">
+        <h4>📂 Inputs necesarios y dónde están</h4>
+        <table class="inputs-table">
+          <tr><td>Equity ratio actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span> — "Equity Ratio %" o en Balance Sheet (Equity / Total Assets)</td></tr>
+          <tr><td>Caja disponible por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Balance Sheet</span></span> — "Cash & Equivalents" por región</td></tr>
+          <tr><td>Deuda a largo plazo pendiente</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans</span></span> — saldo vivo, tipo de interés y vencimiento</td></tr>
+          <tr><td>Proyección P&L / Cash Flow</td><td><span class="nav-path"><span class="seg">Projections</span><span class="arr">›</span><span class="seg">Income Statement</span></span> + <span class="nav-path"><span class="seg">Projections</span><span class="arr">›</span><span class="seg">Cash Flow</span></span> — verifica antes de cerrar</td></tr>
+          <tr><td>Precio acción actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span> — "Share Price" (base para calcular impacto de recompras)</td></tr>
+          <tr><td>Donde introducir decisiones</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans & Equity</span></span>: nuevos préstamos, amortización, dividendo y recompra de acciones</td></tr>
+          <tr><td>Préstamos internos entre filiales</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Internal Loans</span></span> — mover caja de Asia/Europa a USA o viceversa</td></tr>
+        </table>
+      </div>
+      <div class="tip-box">
+        <h4>Objetivo financiero</h4>
+        <p>No minimizar costes de deuda, sino <b>maximizar el retorno al accionista</b>. La estructura óptima de capital es equity ratio entre 40–60%. Por debajo: mejor amortizar deuda. Por encima: no aprovechas el tax shield.</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><span class="val">40–60%</span><span class="lbl">Equity ratio objetivo</span></div>
+        <div class="kpi"><span class="val">8–9%</span><span class="lbl">Rendimiento anual asumido dividendo</span></div>
+        <div class="kpi"><span class="val">>2M$</span><span class="lbl">Cash mínimo requerido</span></div>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <h3>🏦 Deuda</h3>
+          <ul>
+            <li>Gestiona desde la matriz (USA)</li>
+            <li>Deuda a largo plazo: más barata, planificada</li>
+            <li>Deuda a corto plazo: automática si te quedas sin caja (cara)</li>
+            <li>Evita caer en short-term debt no planificado</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>💵 Dividendos</h3>
+          <ul>
+            <li>Dividendo temprano = menos capital propio pero más tiempo para generar interés</li>
+            <li>Pagar dividendo reduce la caja disponible para crecer</li>
+            <li>Establece una política de dividendo consistente</li>
+            <li>Dividendo cuenta directamente en el Shareholder Return</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🔁 Recompra de acciones</h3>
+          <ul>
+            <li>Mejora EPS (acciones recompradas se cancelan)</li>
+            <li>No hagas grandes recompras de golpe — sube el precio</li>
+            <li>Mejor distribuirlas en varios rounds</li>
+            <li>Alternativa al dividendo si hay exceso de caja</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>🌐 Treasury Management</h3>
+          <ul>
+            <li>Mueve caja de Asia/Europa a la matriz (USA) vía préstamos internos</li>
+            <li>Financia inversiones en Asia desde USA si es necesario</li>
+            <li>Mantén un "buffer" de caja por si la demanda falla</li>
+            <li>Revisa el Cash Flow Statement antes de confirmar</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warning-box">
+        <h4>Antes de cerrar el round</h4>
+        <p>Verifica que el presupuesto proyectado cuadra: revisa P&L, Balance Sheet y Cash Flow en PROJECTIONS. Asegúrate de que el equipo ha copiado sus decisiones al área de equipo ("Copy as team's decisions") antes del deadline.</p>
+      </div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="showStep(8)">← Anterior</button>
+        <button class="nav-btn primary" onclick="showStep(0)">↺ Volver al inicio del ciclo</button>
+      </div>
+    </div>
+
+    <!-- STEP 10: XLS ANALYZER -->
+    <div class="step-detail" id="step-10">
+      <div class="step-header">
+        <div class="step-icon">📥</div>
+        <div>
+          <h2>Análisis XLS de Ronda</h2>
+          <p>Importa el Excel de resultados de Cesim para obtener insights automáticos</p>
+        </div>
+      </div>
+
+      <!-- My team input -->
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="color:#5ab8cc;font-size:0.85rem;white-space:nowrap">Tu equipo:</label>
+        <input id="my-team-input" value="Lan Hong Capital"
+          style="background:#0f2030;border:1px solid #1e4a5a;border-radius:6px;color:#e0f0f5;padding:6px 12px;font-size:0.85rem;min-width:200px;outline:none"
+          placeholder="Nombre exacto de tu equipo en el Excel"/>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="xls-input" accept=".xls,.xlsx,.csv" onchange="handleFile(this.files[0])"/>
+        <span class="dz-icon">📊</span>
+        <div class="dz-title">Arrastra el XLS aquí o haz clic para seleccionar</div>
+        <div class="dz-sub">Descarga el Excel desde Cesim: Results → botón XLS (esquina superior derecha)</div>
+      </div>
+
+      <div id="xls-filename"></div>
+
+      <!-- Output area -->
+      <div id="xls-output" style="display:none">
+
+        <!-- TSR Hero -->
+        <div id="tsr-hero"></div>
+
+        <!-- KPI dashboard -->
+        <div class="xls-section-title">📊 Métricas clave detectadas</div>
+        <div class="insights-grid" id="kpi-grid"></div>
+
+        <!-- Recommendations -->
+        <div class="xls-section-title">🎯 Recomendaciones para la próxima ronda</div>
+        <ul class="rec-list" id="rec-list"></ul>
+
+        <!-- Competitive Intelligence -->
+        <div class="xls-section-title">🕵️ Inteligencia competitiva por equipo</div>
+        <div id="comp-intel-area"></div>
+
+        <!-- Sheet tabs + table -->
+        <div class="xls-section-title">📋 Datos completos por hoja</div>
+        <div class="sheet-tabs" id="sheet-tabs"></div>
+        <div class="data-table-wrap">
+          <table class="data-table" id="data-table"></table>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end detail-panel -->
+</div><!-- end main -->
+
+<script>
+  let current = null;
+  let workbookData = {}; // { sheetName: [[row], ...] }
+
+  function showStep(n) {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.querySelectorAll('.step-detail').forEach(el => el.classList.remove('visible'));
+    document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('visible');
+    document.getElementById('item-' + n).classList.add('active');
+    document.getElementById('detail-panel').scrollTo({ top: 0, behavior: 'smooth' });
+    current = n;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (current === null) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') showStep(Math.min(current + 1, 10));
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   showStep(Math.max(current - 1, 0));
+  });
+
+  // Drag & drop
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+
+  // ── FILE HANDLER ──
+  function handleFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      workbookData = {};
+      wb.SheetNames.forEach(name => {
+        const ws = wb.Sheets[name];
+        workbookData[name] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      });
+      document.getElementById('xls-filename').textContent = '✅ Archivo cargado: ' + file.name;
+      document.getElementById('xls-filename').style.display = 'block';
+      document.getElementById('xls-output').style.display = 'block';
+      buildSheetTabs(wb.SheetNames);
+      renderSheet(wb.SheetNames[0]);
+      analyzeData();
+      analyzeCompetitors();
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ── SHEET TABS ──
+  function buildSheetTabs(names) {
+    const c = document.getElementById('sheet-tabs');
+    c.innerHTML = names.map((n, i) =>
+      `<div class="sheet-tab${i===0?' active':''}" onclick="switchTab('${n}',this)">${n}</div>`
+    ).join('');
+  }
+
+  function switchTab(name, el) {
+    document.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderSheet(name);
+  }
+
+  // ── RENDER TABLE ──
+  function renderSheet(name) {
+    const rows = workbookData[name] || [];
+    if (!rows.length) { document.getElementById('data-table').innerHTML = '<tr><td>Sin datos</td></tr>'; return; }
+    const maxCols = Math.max(...rows.map(r => r.length));
+    // header = first non-empty row
+    let headerIdx = rows.findIndex(r => r.some(c => c !== ''));
+    const header = rows[headerIdx] || [];
+    let html = '<thead><tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r.some(c => c !== '')) continue;
+      html += '<tr>' + r.map((c, ci) => {
+        const num = parseFloat(String(c).replace(/,/g,''));
+        const cls = !isNaN(num) && c !== '' ? (num > 0 ? 'num pos' : num < 0 ? 'num neg' : 'num') : '';
+        return `<td class="${cls}">${c}</td>`;
+      }).join('') + '</tr>';
+    }
+    html += '</tbody>';
+    document.getElementById('data-table').innerHTML = html;
+  }
+
+  // ── ANALYSIS ENGINE ──
+  function analyzeData() {
+    // Flatten all sheets into one searchable list: [{label, thisRound, lastRound, sheet}]
+    const metrics = [];
+    Object.entries(workbookData).forEach(([sheet, rows]) => {
+      rows.forEach(row => {
+        if (!row.length) return;
+        const label = String(row[0] || '').trim();
+        if (!label) return;
+        // Look for numeric values in columns — try col1=thisRound, col2=lastRound
+        const vals = row.slice(1).map(c => { const n = parseFloat(String(c).replace(/[,%]/g,'')); return isNaN(n) ? null : n; });
+        metrics.push({ label: label.toLowerCase(), raw: label, vals, sheet });
+      });
+    });
+
+    const find = (keywords) => {
+      const kws = Array.isArray(keywords) ? keywords : [keywords];
+      return metrics.find(m => kws.some(k => m.label.includes(k.toLowerCase())));
+    };
+
+    const kpis = [];
+    const recs = [];
+
+    // ── Sales Revenue ──
+    const sales = find(['sales revenue', 'ventas', 'revenue']);
+    if (sales) {
+      const cur = sales.vals[0], prev = sales.vals[1];
+      const pct = (cur && prev) ? ((cur - prev) / Math.abs(prev) * 100).toFixed(1) : null;
+      kpis.push({ label: 'Sales Revenue (ronda actual)', val: fmtM(cur), desc: prev ? `Ronda anterior: ${fmtM(prev)}` : '', type: pct > 0 ? 'good' : pct < 0 ? 'bad' : 'info' });
+      if (pct !== null) {
+        kpis.push({ label: 'Variación ventas', val: (pct > 0 ? '+' : '') + pct + '%', desc: pct > 5 ? 'Buen crecimiento' : pct < -5 ? 'Caída preocupante — revisa precio y cuota' : 'Crecimiento moderado', type: pct > 5 ? 'good' : pct < -5 ? 'bad' : 'warn' });
+        if (pct < 0) recs.push({ type: 'bad', icon: '📉', text: `Ventas cayeron un ${Math.abs(pct)}%. Revisa si perdiste cuota de mercado o si el precio está por encima del mercado.` });
+        if (pct > 15) recs.push({ type: 'good', icon: '🚀', text: `Crecimiento en ventas del ${pct}%. Considera si tienes suficiente capacidad de producción para el próximo round.` });
+      }
+    }
+
+    // ── EBIT / Operating Profit ──
+    const ebit = find(['operating profit', 'ebit', 'beneficio operativo', 'profit before']);
+    if (ebit) {
+      const cur = ebit.vals[0];
+      const margin = (sales && sales.vals[0]) ? (cur / sales.vals[0] * 100).toFixed(1) : null;
+      kpis.push({ label: 'EBIT', val: fmtM(cur), desc: margin ? `Margen EBIT: ${margin}%` : '', type: cur > 0 ? 'good' : 'bad' });
+      if (cur < 0) recs.push({ type: 'bad', icon: '🔴', text: 'EBIT negativo. Revisa estructura de costes: R&D, promoción y costes de producción. Considera reducir gasto discrecional.' });
+      if (margin && margin < 5) recs.push({ type: 'warn', icon: '⚠️', text: `Margen EBIT bajo (${margin}%). Hay presión en costes. Revisa el coste unitario de producción y la utilización de planta.` });
+      if (margin && margin > 20) recs.push({ type: 'good', icon: '✅', text: `Margen EBIT saludable (${margin}%). Puedes considerar invertir más agresivamente en R&D o marketing para crecer.` });
+    }
+
+    // ── R&D ──
+    const rd = find(['r&d', 'research', 'i+d', 'research & development']);
+    if (rd && sales) {
+      const rdVal = rd.vals[0], salesVal = sales.vals[0];
+      const rdPct = (rdVal && salesVal) ? (rdVal / salesVal * 100).toFixed(1) : null;
+      if (rdPct) {
+        kpis.push({ label: 'R&D / Ventas', val: rdPct + '%', desc: 'Referencia sector: ~10%', type: rdPct >= 8 ? 'good' : rdPct < 5 ? 'bad' : 'warn' });
+        if (rdPct < 5) recs.push({ type: 'bad', icon: '🔬', text: `R&D solo el ${rdPct}% de ventas (ref: ~10%). Riesgo de quedarte atrás en tecnología. Aumenta inversión en R&D o compra licencias.` });
+        if (rdPct > 15) recs.push({ type: 'warn', icon: '💡', text: `R&D muy alto (${rdPct}%). Asegúrate de que el retorno es claro: ¿cuántas unidades necesitas vender para amortizarlo?` });
+      }
+    }
+
+    // ── Promotion / Marketing ──
+    const promo = find(['promotion', 'marketing', 'publicidad', 'advertising']);
+    if (promo && sales) {
+      const pVal = promo.vals[0], sVal = sales.vals[0];
+      const pPct = (pVal && sVal) ? (pVal / sVal * 100).toFixed(1) : null;
+      if (pPct) {
+        kpis.push({ label: 'Marketing / Ventas', val: pPct + '%', desc: 'Referencia sector: 3–5%', type: pPct >= 3 && pPct <= 6 ? 'good' : pPct < 2 ? 'warn' : 'info' });
+        if (pPct < 2) recs.push({ type: 'warn', icon: '📣', text: `Gasto en marketing bajo (${pPct}%). En USA y Europa la publicidad tiene alto impacto en cuota. Considera aumentar.` });
+      }
+    }
+
+    // ── Market Share ──
+    const ms = find(['market share', 'cuota', 'share %', 'market shares']);
+    if (ms) {
+      const cur = ms.vals[0], prev = ms.vals[1];
+      if (cur !== null) {
+        const type = prev ? (cur > prev ? 'good' : cur < prev ? 'bad' : 'info') : 'info';
+        kpis.push({ label: 'Cuota de mercado', val: cur + '%', desc: prev !== null ? `Anterior: ${prev}%` : '', type });
+        if (prev !== null && cur < prev) recs.push({ type: 'bad', icon: '📊', text: `Pérdida de cuota (${prev}% → ${cur}%). Analiza precio relativo vs. competidores y nivel de features.` });
+      }
+    }
+
+    // ── Production cost ──
+    const pc = find(['variable production', 'production cost', 'coste produccion', 'coste de producción']);
+    if (pc && sales) {
+      const pcVal = pc.vals[0], sVal = sales.vals[0];
+      const pcPct = (pcVal && sVal) ? (pcVal / sVal * 100).toFixed(1) : null;
+      if (pcPct) {
+        kpis.push({ label: 'Coste producción / Ventas', val: pcPct + '%', desc: 'Cuanto menor, mejor margen bruto', type: pcPct < 35 ? 'good' : pcPct > 50 ? 'bad' : 'warn' });
+        if (pcPct > 50) recs.push({ type: 'bad', icon: '🏭', text: `Costes de producción muy altos (${pcPct}% de ventas). Verifica utilización de planta (óptimo 70–90%) y curva de aprendizaje.` });
+      }
+    }
+
+    // ── Short-term debt ──
+    const std = find(['short term', 'short-term debt', 'deuda corto', 'short term loan']);
+    if (std && std.vals[0] > 0) {
+      kpis.push({ label: 'Deuda a corto plazo', val: fmtM(std.vals[0]), desc: '⚠️ Penalización de tipos alta', type: 'bad' });
+      recs.push({ type: 'bad', icon: '🏦', text: `Tienes deuda a corto plazo (${fmtM(std.vals[0])}). Es la más cara. Ajusta tu política de caja y considera deuda a largo plazo en su lugar.` });
+    }
+
+    // ── Equity ratio ──
+    const eq = find(['equity ratio', 'ratio de capital', 'solvency', 'shareholders equity']);
+    const ta = find(['total assets', 'activo total']);
+    if (eq && ta && eq.vals[0] && ta.vals[0]) {
+      const ratio = (eq.vals[0] / ta.vals[0] * 100).toFixed(1);
+      const type = ratio >= 40 && ratio <= 60 ? 'good' : 'warn';
+      kpis.push({ label: 'Equity Ratio', val: ratio + '%', desc: 'Objetivo: 40–60%', type });
+      if (ratio < 40) recs.push({ type: 'warn', icon: '⚖️', text: `Equity ratio bajo (${ratio}%). Considera amortizar deuda antes que pagar dividendos.` });
+      if (ratio > 65) recs.push({ type: 'warn', icon: '⚖️', text: `Equity ratio alto (${ratio}%). No estás aprovechando el tax shield. Considera recompra de acciones o dividendos.` });
+    }
+
+    // ── Unsatisfied demand ──
+    const ud = find(['unsatisfied demand', 'demanda insatisfecha', 'lost sales']);
+    if (ud && ud.vals[0] > 0) {
+      kpis.push({ label: 'Demanda insatisfecha', val: fmtK(ud.vals[0]) + ' u.', desc: '⚠️ Ventas perdidas por falta de stock', type: 'bad' });
+      recs.push({ type: 'bad', icon: '📦', text: `Hubo demanda insatisfecha (${fmtK(ud.vals[0])} unidades). Aumenta capacidad o reduce la subestimación de demanda en el próximo round.` });
+    }
+
+    // ── Shareholder return (TSR) — objetivo principal ──
+    const sr = find(['retorno total acumulado del accionista','retorno total acumulado','shareholder return','cumulative','retorno accionista']);
+    const stockPrice = find(['precio de la acción al final','precio de la acción','share price','stock price']);
+    const divYield  = find(['rendimiento de los dividendos','dividend yield']);
+    const pe        = find(['ratio precio-beneficio','ratio precio-benefício','p/e','price-earnings']);
+
+    const tsrVal = sr ? sr.vals[0] : null;
+    const spVal  = stockPrice ? stockPrice.vals[0] : null;
+    const spPrev = stockPrice ? stockPrice.vals[1] : null;
+
+    // TSR hero banner
+    const tsrHero = document.getElementById('tsr-hero');
+    if (tsrHero) {
+      const tsrPct = tsrVal !== null ? tsrVal.toFixed(2) : '—';
+      const tsrColor = tsrVal > 15 ? '#4ec94e' : tsrVal > 0 ? '#f0c040' : tsrVal === 0 ? '#5ab8cc' : '#e05a5a';
+      const spChange = (spVal && spPrev) ? ((spVal - spPrev) / Math.abs(spPrev) * 100).toFixed(1) : null;
+      tsrHero.innerHTML = `
+        <div style="background:linear-gradient(135deg,#0f2030,#091820);border:2px solid ${tsrColor};border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:20px;align-items:center">
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:0.75rem;color:#5ab8cc;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🏆 OBJETIVO PRINCIPAL</div>
+            <div style="font-size:0.85rem;color:#8ab0c0;margin-bottom:8px">Retorno Total Acumulado del Accionista (p.a.)</div>
+            <div style="font-size:2.8rem;font-weight:700;color:${tsrColor};line-height:1">${tsrVal !== null && tsrVal > 0 ? '+' : ''}${tsrPct}%</div>
+            <div style="font-size:0.78rem;color:#5ab8cc;margin-top:6px">${tsrVal === 0 ? 'Ronda inicial — sin diferencias aún' : tsrVal > 15 ? 'Por encima del objetivo. Mantén el rumbo.' : tsrVal > 0 ? 'Positivo. Foco en precio acción y dividendos.' : 'Negativo. Prioriza rentabilidad operativa.'}</div>
+          </div>
+          ${spVal ? `<div style="text-align:center;padding:0 16px;border-left:1px solid #1a3a4a">
+            <div style="font-size:0.72rem;color:#5ab8cc;margin-bottom:4px">Precio acción</div>
+            <div style="font-size:1.5rem;font-weight:600;color:#e0f0f5">$${spVal.toFixed(2)}</div>
+            ${spChange ? `<div style="font-size:0.78rem;color:${spChange > 0 ? '#4ec94e' : '#e05a5a'}">${spChange > 0 ? '▲' : '▼'} ${Math.abs(spChange)}% vs anterior</div>` : ''}
+          </div>` : ''}
+          ${divYield && divYield.vals[0] !== null ? `<div style="text-align:center;padding:0 16px;border-left:1px solid #1a3a4a">
+            <div style="font-size:0.72rem;color:#5ab8cc;margin-bottom:4px">Dividend yield</div>
+            <div style="font-size:1.5rem;font-weight:600;color:#e0f0f5">${divYield.vals[0].toFixed(1)}%</div>
+          </div>` : ''}
+          ${pe && pe.vals[0] ? `<div style="text-align:center;padding:0 16px;border-left:1px solid #1a3a4a">
+            <div style="font-size:0.72rem;color:#5ab8cc;margin-bottom:4px">P/E ratio</div>
+            <div style="font-size:1.5rem;font-weight:600;color:#e0f0f5">${pe.vals[0].toFixed(1)}x</div>
+          </div>` : ''}
+        </div>`;
+    }
+
+    if (tsrVal !== null) {
+      kpis.push({ label: 'TSR acumulado (p.a.)', val: (tsrVal > 0 ? '+' : '') + tsrVal.toFixed(2) + '%', desc: 'Criterio de victoria — anualizado', type: tsrVal > 15 ? 'good' : tsrVal > 0 ? 'info' : tsrVal === 0 ? 'info' : 'bad' });
+      if (tsrVal < 0) recs.push({ type: 'bad', icon: '📉', text: `TSR negativo (${tsrVal.toFixed(1)}%). Foco en rentabilidad y precio de la acción. Evita pérdidas operativas.` });
+      if (tsrVal > 20) recs.push({ type: 'good', icon: '🏆', text: `TSR excelente (${tsrVal.toFixed(1)}%). Mantén la estrategia y vigila que los rivales no te alcancen por la vía de R&D o cuota.` });
+    }
+
+    // ── Generic positive catch-all ──
+    if (recs.length === 0) {
+      recs.push({ type: 'info', icon: 'ℹ️', text: 'Datos cargados correctamente. Revisa las métricas detectadas arriba y compáralas con la ronda anterior.' });
+    }
+    recs.push({ type: 'info', icon: '🗺️', text: 'Usa los pasos 1–9 del menú para planificar cada área de decisión con estos datos en mente.' });
+
+    // ── RENDER ──
+    document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+      <div class="insight-card ${k.type}">
+        <div class="ic-label">${k.label}</div>
+        <div class="ic-val">${k.val}</div>
+        <div class="ic-desc">${k.desc}</div>
+      </div>`).join('') || '<p style="color:#5a8a9a;font-size:0.84rem">No se detectaron métricas clave. Prueba con otra hoja del Excel.</p>';
+
+    document.getElementById('rec-list').innerHTML = recs.map(r => `
+      <li class="${r.type}"><span class="rec-icon">${r.icon}</span><span>${r.text}</span></li>`).join('');
+  }
+
+  // ── COMPETITOR ANALYSIS ──
+  const PALETTE = ['#4a9fe0','#e05a5a','#4ec94e','#e0943a','#a04ae0','#e0d04a','#e04aaa','#4ae0c8'];
+  let myTeamName = '';
+
+  function analyzeCompetitors() {
+    myTeamName = (document.getElementById('my-team-input')?.value || '').trim().toLowerCase();
+
+    // ── Detect header row with multiple team-name columns ──
+    // A valid team header row: row where ≥2 cells are non-empty non-numeric strings
+    // AND at least one subsequent row below has numbers in those same columns.
+    let teamSheet = null, teamRowIdx = null, teamCols = {}; // { "Lan Hong Capital": colIndex }
+
+    for (const [sheetName, rows] of Object.entries(workbookData)) {
+      for (let ri = 0; ri < Math.min(rows.length, 20); ri++) {
+        const row = rows[ri];
+        const candidates = {};
+        row.forEach((cell, ci) => {
+          if (ci === 0) return; // skip label column
+          const v = String(cell).trim();
+          if (!v) return;
+          const n = parseFloat(v.replace(/,/g,''));
+          // Accept if it's a non-numeric string of reasonable length (a name)
+          if (isNaN(n) && v.length > 1 && v.length < 50) candidates[v] = ci;
+        });
+        if (Object.keys(candidates).length >= 2) {
+          // Verify: at least one row below has numeric values in those columns
+          const colIdxs = Object.values(candidates);
+          const hasData = rows.slice(ri+1, ri+10).some(r =>
+            colIdxs.some(ci => { const n = parseFloat(String(r[ci]||'').replace(/[,%]/g,'')); return !isNaN(n) && n !== 0; })
+          );
+          if (hasData) {
+            teamSheet = sheetName; teamRowIdx = ri; teamCols = candidates; break;
+          }
+        }
+      }
+      if (teamSheet) break;
+    }
+
+    const area = document.getElementById('comp-intel-area');
+
+    if (!teamSheet) {
+      area.innerHTML = `<div class="tip-box"><h4>Sin columnas de equipos detectadas</h4>
+        <p>Asegúrate de descargar el Excel desde <b>Results → Financial Statements (Global)</b> en Cesim — esa vista tiene una columna por equipo. Si ya lo hiciste, revisa que los nombres de equipos estén en la fila de cabecera.</p></div>`;
+      return;
+    }
+
+    const rows = workbookData[teamSheet];
+    const teams = Object.keys(teamCols); // exact names as they appear in the Excel
+
+    // Step 3: extract per-team metrics scanning rows below header
+    const KEY_METRICS = [
+      { key:'sales',    labels:['ingresos por ventas','sales revenue','ventas','revenue'], fmt:'M$' },
+      { key:'ebit',     labels:['beneficio operativo (ebit)','operating profit','ebit','profit before'], fmt:'M$' },
+      { key:'rd',       labels:['i+d','r&d','research & development','research and development'], fmt:'M$' },
+      { key:'promo',    labels:['promoción','promotion','marketing','advertising','publicidad'], fmt:'M$' },
+      { key:'varcost',  labels:['costes de fabricación interna','variable production','production costs'], fmt:'M$' },
+      { key:'featcost', labels:['costes de características','feature cost','feature costs'], fmt:'M$' },
+      { key:'contract', labels:['costes de fabricación por contrato','contract manufacturing','subcontrat'], fmt:'M$' },
+      { key:'mshare',   labels:['cuota de mercado','market share','share %'], fmt:'%' },
+      { key:'srtrn',    labels:['retorno total acumulado del accionista','retorno total acumulado','shareholder return','cumulative'], fmt:'%' },
+      { key:'stockpx',  labels:['precio de la acción al final de la ronda','precio de la acción al final','share price at end','stock price'], fmt:'$' },
+      { key:'marketcap',labels:['capitalización de mercado','market capitalization','market cap'], fmt:'M$' },
+      { key:'eqratio',  labels:['ratio patrimonio neto','ratio de fondos propios','equity ratio','ratio de capital'], fmt:'%' },
+      { key:'roe',      labels:['rendimiento de los fondos propios','return on equity','roe'], fmt:'%' },
+      { key:'gmarg',    labels:['margen bruto','gross margin'], fmt:'%' },
+      { key:'ros',      labels:['rentabilidad de las ventas','return on sales','ros'], fmt:'%' },
+      { key:'eps',      labels:['ganancias por acción','earnings per share','eps'], fmt:'$' },
+      { key:'pxusa',    labels:['precio de venta, usd','selling price, usd','price usd'], fmt:'$' },
+      { key:'unitsusa', labels:['ventas, miles de unidades','sales, thousands','ventas en ee.uu.'], fmt:'k' },
+      { key:'unsatdem', labels:['demanda insatisfecha','unsatisfied demand','lost demand'], fmt:'k' },
+      { key:'produtil', labels:['capacidad disponible','utilización','capacity utilization'], fmt:'%' },
+    ];
+
+    const teamData = {}; // {team: {metric_key: value}}
+    teams.forEach(t => { teamData[t] = {}; });
+
+    for (let ri = teamRowIdx + 1; ri < rows.length; ri++) {
+      const row = rows[ri];
+      const label = String(row[0] || '').toLowerCase().trim();
+      if (!label) continue;
+      const metric = KEY_METRICS.find(m => m.labels.some(l => label.includes(l)));
+      if (!metric) continue;
+      // Skip if already found with a real value (not null)
+      if (teamData[teams[0]][metric.key] != null) continue;
+      // Check if this row actually has numeric data (skip section-header rows with empty values)
+      const hasValues = teams.some(t => {
+        const n = parseFloat(String(row[teamCols[t]] || '').replace(/[,%\s]/g,''));
+        return !isNaN(n);
+      });
+      if (!hasValues) continue;
+      teams.forEach(t => {
+        const ci = teamCols[t];
+        const raw = row[ci];
+        const n = parseFloat(String(raw || '').replace(/[,%\s]/g,''));
+        teamData[t][metric.key] = isNaN(n) ? null : n;
+      });
+    }
+
+    // Step 4: infer my team (highest or first — ask user to identify)
+    // For now highlight the best performer per metric
+
+    // Build summary comparison table
+    const metricLabels = {
+      srtrn:'🏆 TSR acumulado', stockpx:'💹 Precio acción',
+      sales:'Ventas', ebit:'EBIT', rd:'R&D', promo:'Promoción',
+      varcost:'Coste producción', featcost:'Coste features', contract:'Outsourcing',
+      mshare:'Cuota mercado', eqratio:'Equity ratio'
+    };
+    const availableMetrics = KEY_METRICS.filter(m =>
+      teams.some(t => teamData[t][m.key] !== null && teamData[t][m.key] !== undefined)
+    );
+
+    // Helper: color by team index; own team gets gold
+    const teamColor = (t) => t.toLowerCase() === myTeamName ? '#f0c040' : PALETTE[teams.indexOf(t) % PALETTE.length];
+    const isMyTeam = (t) => myTeamName && t.toLowerCase() === myTeamName;
+
+    // Summary table HTML
+    let tableHTML = `<div class="comp-summary"><h4>Comparativa entre equipos — ${teamSheet}</h4>
+      <table class="comp-table"><thead><tr>
+        <th>Métrica</th>${teams.map(t=>`<th style="color:${teamColor(t)};${isMyTeam(t)?'background:#f0c04018;border-bottom:2px solid #f0c040':''}">${t}${isMyTeam(t)?' 👑':''}</th>`).join('')}
+      </tr></thead><tbody>`;
+
+    availableMetrics.forEach(m => {
+      const vals = teams.map(t => teamData[t][m.key]);
+      const numVals = vals.filter(v => v !== null);
+      if (!numVals.length) return;
+      const maxV = Math.max(...numVals), minV = Math.min(...numVals);
+      tableHTML += `<tr><td class="name">${metricLabels[m.key] || m.key}</td>`;
+      vals.forEach((v, ti) => {
+        if (v === null) { tableHTML += '<td style="color:#333">—</td>'; return; }
+        const isBest = (['ebit','sales','srtrn','mshare','stockpx'].includes(m.key)) ? v === maxV
+                     : (m.key === 'varcost') ? v === minV : v === maxV;
+        const isWorst = (['ebit','sales','srtrn','stockpx'].includes(m.key)) ? v === minV : false;
+        const cls = isBest ? 'best' : isWorst ? 'worst' : '';
+        const display = m.fmt === 'M$' ? fmtM(v) : m.fmt === '$' ? '$'+v.toFixed(2) : v.toFixed(1)+'%';
+        const rowStyle = (m.key === 'srtrn' || m.key === 'stockpx') ? 'font-weight:600' : '';
+        tableHTML += `<td class="${cls}" style="${rowStyle}">${display}${isBest?' ★':''}</td>`;
+      });
+      tableHTML += '</tr>';
+    });
+    tableHTML += '</tbody></table></div>';
+
+    // ── Helpers ──
+    const maxOf = (key) => Math.max(...teams.map(x => teamData[x][key] || 0));
+    const minOf = (key) => Math.min(...teams.filter(x => teamData[x][key] != null).map(x => teamData[x][key]));
+    const rankOf = (key, t, higherIsBetter=true) => {
+      const sorted = [...teams].filter(x => teamData[x][key] != null)
+        .sort((a,b) => higherIsBetter ? teamData[b][key]-teamData[a][key] : teamData[a][key]-teamData[b][key]);
+      return sorted.indexOf(t) + 1;
+    };
+
+    // Team cards
+    let cardsHTML = '<div class="team-grid">';
+    teams.forEach(t => {
+      const d = teamData[t];
+      const color = teamColor(t);
+      const mine = isMyTeam(t);
+      const salesV = d.sales, ebitV = d.ebit, rdV = d.rd, promoV = d.promo,
+            featV = d.featcost, contractV = d.contract, stockV = d.stockpx,
+            roeV = d.roe, gmV = d.gmarg, epsV = d.eps;
+
+      const rdPct    = (rdV && salesV)    ? (rdV/salesV*100)    : null;
+      const promoPct = (promoV && salesV) ? (promoV/salesV*100) : null;
+      const ebitPct  = (ebitV && salesV)  ? (ebitV/salesV*100)  : null;
+      const featPct  = (featV && salesV)  ? (featV/salesV*100)  : null;
+
+      const tags = [];
+      if (rdPct !== null) {
+        if (rdPct > 12)     tags.push({label:'R&D agresivo', cls:'red'});
+        else if (rdPct > 7) tags.push({label:'R&D activo', cls:'yellow'});
+        else                tags.push({label:'R&D bajo', cls:'blue'});
+      }
+      if (promoPct !== null) {
+        if (promoPct > 5)      tags.push({label:'Mkt agresivo', cls:'red'});
+        else if (promoPct < 2) tags.push({label:'Mkt contenido', cls:'blue'});
+      }
+      if (contractV && contractV > 0) tags.push({label:'Outsourcing', cls:'yellow'});
+      if (featPct !== null && featPct > 6) tags.push({label:'Alta diferenciación', cls:'green'});
+      if (ebitPct !== null) {
+        if (ebitPct > 20)    tags.push({label:'Muy rentable', cls:'green'});
+        else if (ebitPct < 0) tags.push({label:'Pérdidas', cls:'red'});
+      }
+      if (stockV) {
+        const rank = rankOf('stockpx', t);
+        if (rank === 1) tags.push({label:'#1 precio acción', cls:'green'});
+      }
+
+      const barMetrics = [
+        { label:'Ventas',        val: salesV,  maxVal: maxOf('sales') },
+        { label:'Precio acción', val: stockV,  maxVal: maxOf('stockpx') },
+        { label:'EBIT%',         val: ebitPct, maxVal: 35 },
+        { label:'Marketing',     val: promoV,  maxVal: maxOf('promo') },
+        { label:'R&D',           val: rdV,     maxVal: maxOf('rd') || 1 },
+      ].filter(bm => bm.val != null && bm.maxVal > 0);
+
+      cardsHTML += `<div class="team-card" style="${mine?'border:2px solid #f0c040;box-shadow:0 0 12px #f0c04044':''}">
+        <div class="team-card-header" style="background:${color}18;border-bottom:1px solid ${color}33">
+          <div class="team-dot" style="background:${color}"></div>
+          <span style="color:${color}">${t}${mine?' 👑 <span style="font-size:0.7rem;background:#f0c040;color:#0f1923;border-radius:4px;padding:1px 5px;margin-left:4px">TÚ</span>':''}</span>
+          ${stockV ? `<span style="margin-left:auto;color:${color};font-size:0.8rem;font-weight:600">$${stockV.toFixed(0)}</span>` : ''}
+        </div>
+        <div class="team-card-body">`;
+
+      barMetrics.forEach(bm => {
+        const pct = Math.max(0, Math.min(100, (bm.val / bm.maxVal) * 100));
+        const dispVal = bm.label === 'EBIT%' ? bm.val.toFixed(1)+'%' : bm.label === 'Precio acción' ? '$'+bm.val.toFixed(0) : fmtM(bm.val);
+        cardsHTML += `<div class="team-metric">
+          <span class="tm-label">${bm.label}</span>
+          <div class="tm-bar-wrap"><div class="tm-bar" style="width:${pct}%;background:${color}88"></div></div>
+          <span class="tm-val">${dispVal}</span>
+        </div>`;
+      });
+
+      // Extra stats row
+      const extras = [];
+      if (roeV) extras.push(`ROE ${roeV.toFixed(0)}%`);
+      if (gmV)  extras.push(`Mg.bruto ${gmV.toFixed(0)}%`);
+      if (epsV) extras.push(`EPS $${epsV.toFixed(1)}`);
+      if (extras.length) cardsHTML += `<div style="font-size:0.72rem;color:#5a8090;padding:4px 0 2px;border-top:1px solid #1a3040;margin-top:4px">${extras.join(' · ')}</div>`;
+
+      cardsHTML += `</div>
+        <div class="team-card-tags">${tags.map(tg=>`<span class="tag ${tg.cls}">${tg.label}</span>`).join('')}</div>
+      </div>`;
+    });
+    cardsHTML += '</div>';
+
+    // ── Spy insights per rival team ──
+    let spyHTML = '';
+    teams.forEach(t => {
+      if (isMyTeam(t)) return;
+      const d = teamData[t];
+      const color = teamColor(t);
+      const salesV = d.sales, ebitV = d.ebit, rdV = d.rd, promoV = d.promo,
+            featV = d.featcost, contractV = d.contract, stockV = d.stockpx,
+            roeV = d.roe, gmV = d.gmarg, rosV = d.ros, epsV = d.eps,
+            eqrV = d.eqratio, mcapV = d.marketcap;
+
+      const rdPct    = (rdV && salesV)    ? (rdV/salesV*100)    : null;
+      const promoPct = (promoV && salesV) ? (promoV/salesV*100) : null;
+      const ebitPct  = (ebitV && salesV)  ? (ebitV/salesV*100)  : null;
+      const featPct  = (featV && salesV)  ? (featV/salesV*100)  : null;
+
+      const myD = teamData[teams.find(x => isMyTeam(x))] || {};
+      const myStock = myD.stockpx, mySales = myD.sales, myEbit = myD.ebit;
+      const myEbitPct = (myEbit && mySales) ? (myEbit/mySales*100) : null;
+
+      const bullets = [];
+
+      // Stock price comparison (TSR proxy)
+      if (stockV && myStock) {
+        const diff = ((stockV - myStock)/myStock*100).toFixed(1);
+        if (stockV > myStock)
+          bullets.push({ icon:'💹', cls:'bad',  text:`Precio acción ${diff}% superior al tuyo ($${stockV.toFixed(0)} vs $${myStock.toFixed(0)}) — va por delante en TSR. Revisa si su ventaja viene de mayor margen o de dividendos.` });
+        else
+          bullets.push({ icon:'💹', cls:'good', text:`Precio acción ${Math.abs(diff)}% inferior al tuyo ($${stockV.toFixed(0)} vs $${myStock.toFixed(0)}) — estás por delante en TSR. Mantén la rentabilidad para sostenerlo.` });
+      }
+
+      // EBIT margin
+      if (ebitPct !== null && myEbitPct !== null) {
+        const gap = (ebitPct - myEbitPct).toFixed(1);
+        if (ebitPct > myEbitPct + 3)
+          bullets.push({ icon:'📊', cls:'bad',  text:`Margen EBIT ${ebitPct.toFixed(1)}% vs tu ${myEbitPct.toFixed(1)}% — es más rentable. Probablemente tiene menores costes de producción o mayor precio de venta. Revisa su precio en cada mercado.` });
+        else if (ebitPct < myEbitPct - 3)
+          bullets.push({ icon:'📊', cls:'good', text:`Margen EBIT ${ebitPct.toFixed(1)}% vs tu ${myEbitPct.toFixed(1)}% — eres más rentable. Tienes más margen para invertir agresivamente en R&D o marketing sin ponerte en rojo.` });
+      }
+
+      // R&D
+      if (rdPct !== null) {
+        if (rdPct > 10)
+          bullets.push({ icon:'🔬', cls:'warn', text:`Invierte ${rdPct.toFixed(1)}% de ventas en R&D — preparando nueva tecnología o features. Si no estás al mismo nivel, riesgo de quedarte atrás en Tech 2/3.` });
+        else if (rdPct === 0)
+          bullets.push({ icon:'🔬', cls:'good', text:`R&D cero esta ronda — apuesta por costes bajos, sin diferenciación tech. Oportunidad: si tú inviertes en R&D ahora, puedes lanzar Tech 2 antes que él.` });
+        else if (rdPct < 3)
+          bullets.push({ icon:'🔬', cls:'good', text:`R&D muy bajo (${rdPct.toFixed(1)}%) — no priorizando innovación. Mantén o aumenta tu inversión en R&D para crear ventaja tecnológica diferencial.` });
+      }
+
+      // Marketing / promotion
+      if (promoPct !== null) {
+        if (promoPct > 4)
+          bullets.push({ icon:'📣', cls:'warn', text:`Marketing agresivo (${promoPct.toFixed(1)}% de ventas) — luchando activamente por cuota, especialmente en USA y Europa. Compara con tu inversión y ajusta si te está quitando cuota.` });
+        else if (promoPct < 1.5)
+          bullets.push({ icon:'📣', cls:'good', text:`Marketing contenido (${promoPct.toFixed(1)}%) — no pelea por cuota vía publicidad. Aprovecha aumentando tu promoción en mercados donde competís directamente.` });
+      }
+
+      // Gross margin
+      if (gmV) {
+        const myGm = myD.gmarg;
+        if (myGm && gmV > myGm + 5)
+          bullets.push({ icon:'🏭', cls:'bad',  text:`Margen bruto ${gmV.toFixed(0)}% vs tu ${myGm.toFixed(0)}% — sus costes de producción son menores o su precio mayor. Revisa eficiencia de planta (utilización 70–90%) y curva de aprendizaje.` });
+        else if (!myGm)
+          bullets.push({ icon:'🏭', cls:'info', text:`Margen bruto ${gmV.toFixed(0)}% — indica eficiencia productiva. ${gmV > 45 ? 'Alto: buena curva de aprendizaje o precio premium.' : gmV < 35 ? 'Bajo: posible sobrecoste de producción o precio agresivo.' : 'En línea con el sector.'}` });
+      }
+
+      // ROE
+      if (roeV) {
+        const myRoe = myD.roe;
+        if (myRoe && roeV > myRoe + 5)
+          bullets.push({ icon:'💰', cls:'bad',  text:`ROE ${roeV.toFixed(0)}% vs tu ${myRoe.toFixed(0)}% — genera más retorno por cada unidad de capital propio. Puede sostener mayor crecimiento o mejores dividendos.` });
+      }
+
+      // Features / differentiation
+      if (featPct !== null && featPct > 7)
+        bullets.push({ icon:'⭐', cls:'warn', text:`Alta inversión en features (${featPct.toFixed(1)}% ventas) — estrategia de diferenciación, peligrosa especialmente en Europa donde el mercado las valora más. Asegúrate de igualar o superar en tu mercado clave.` });
+
+      // Outsourcing
+      if (contractV && contractV > 0) {
+        const myContr = myD.contract;
+        if (!myContr || myContr < contractV)
+          bullets.push({ icon:'🏗️', cls:'info', text:`Usa fabricación subcontratada (${fmtM(contractV)}) — tiene restricción de capacidad propia. Si tú tienes más capacidad interna, tu coste por unidad será menor y tu curva de aprendizaje más avanzada.` });
+      }
+
+      // Equity / leverage
+      if (eqrV) {
+        if (eqrV > 65)
+          bullets.push({ icon:'⚖️', cls:'info', text:`Equity ratio alto (${eqrV.toFixed(0)}%) — infrautiliza el apalancamiento. Podría hacer una gran recompra de acciones o pagar dividendos que suban su TSR rápido. Vigila sus movimientos financieros próxima ronda.` });
+        else if (eqrV < 35)
+          bullets.push({ icon:'⚖️', cls:'warn', text:`Equity ratio bajo (${eqrV.toFixed(0)}%) — muy apalancado. Tiene presión de deuda, menos flexibilidad para invertir. Si hay un shock de demanda, lo sufrirá más.` });
+      }
+
+      // Fallback
+      if (!bullets.length)
+        bullets.push({ icon:'ℹ️', cls:'info', text:'Datos detectados pero sin diferencias significativas vs el campo. Revisa la tabla comparativa arriba.' });
+
+      spyHTML += `<div class="spy-box">
+        <div class="spy-team" style="color:${color}">⬤ ${t}</div>
+        ${bullets.map(b => `
+          <div style="display:flex;gap:10px;align-items:flex-start;margin-top:8px">
+            <span style="font-size:1rem;line-height:1.4">${b.icon}</span>
+            <span style="font-size:0.82rem;color:${b.cls==='bad'?'#e07070':b.cls==='good'?'#5ec870':b.cls==='warn'?'#e0b040':'#7ab8c8'};line-height:1.5">${b.text}</span>
+          </div>`).join('')}
+      </div>`;
+    });
+
+    area.innerHTML = tableHTML + cardsHTML +
+      `<div class="xls-section-title" style="margin-top:24px">🕵️ Señales estratégicas por equipo</div>` + spyHTML;
+  }
+
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function fmtM(n) {
+    if (n === null || n === undefined) return '—';
+    if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + 'M$';
+    if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(0) + 'k$';
+    return n.toFixed(0) + '$';
+  }
+  function fmtK(n) {
+    if (!n) return '—';
+    return Math.abs(n) >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n);
+  }
+</script>
+</body>
+</html>
