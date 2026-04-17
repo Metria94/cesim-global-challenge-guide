@@ -397,15 +397,33 @@
       color: #0d7c8f; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
     }
     .inputs-table {
-      width: 100%; border-collapse: collapse; font-size: 0.8rem;
+      width: 100%; border-collapse: collapse; font-size: 0.79rem;
+    }
+    .inputs-table thead tr { border-bottom: 2px solid #1e3a4a; }
+    .inputs-table thead td {
+      font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.8px;
+      color: #3a7a8a; padding: 4px 8px 6px; font-weight: 700;
     }
     .inputs-table tr { border-bottom: 1px solid #1a2d3e; }
     .inputs-table tr:last-child { border-bottom: none; }
     .inputs-table td { padding: 6px 8px; vertical-align: top; line-height: 1.45; }
     .inputs-table td:first-child {
-      color: #c0d8e4; font-weight: 600; width: 38%; white-space: nowrap;
+      color: #c0d8e4; font-weight: 600; width: 24%;
     }
-    .inputs-table td:last-child { color: #5ab8cc; }
+    .inputs-table td:nth-child(2) { color: #5ab8cc; width: 38%; }
+    .inputs-table td:nth-child(3) { width: 38%; }
+    .field-write {
+      display: inline-flex; align-items: flex-start; gap: 5px;
+      background: #0a2010; border: 1px solid #1a5a2a;
+      border-radius: 5px; padding: 3px 8px; color: #6ee88a;
+      font-size: 0.77rem; line-height: 1.4;
+    }
+    .field-write::before { content: "✏️"; font-size: 0.7rem; flex-shrink:0; margin-top:1px; }
+    .field-read {
+      display: inline-flex; align-items: flex-start; gap: 5px;
+      color: #4a7a8a; font-size: 0.77rem; font-style: italic;
+    }
+    .field-read::before { content: "👁"; font-size: 0.7rem; flex-shrink:0; }
     .nav-path {
       display: inline-flex; align-items: center; gap: 3px;
       font-family: monospace; font-size: 0.75rem;
@@ -635,13 +653,14 @@
       <div class="inputs-box">
         <h4>📂 Dónde encontrar los datos en Cesim</h4>
         <table class="inputs-table">
-          <tr><td>TSR + precio acción</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span> — filas "Cumulative Shareholder Return" y "Share Price"</td></tr>
-          <tr><td>P&L (ventas, EBIT, beneficio)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — Global view</td></tr>
-          <tr><td>Balance (deuda, equity ratio)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Balance Sheet</span></span></td></tr>
-          <tr><td>Cuota de mercado por región</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span> — filtrar por tech y área</td></tr>
-          <tr><td>Demanda insatisfecha (lost sales)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Demand & Sales</span></span></td></tr>
-          <tr><td>Utilización de planta</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span> — columna "Capacity Utilization %"</td></tr>
-          <tr><td>Comparativa todos los equipos</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Firm Comparison</span></span> + botón <b>XLS</b> arriba a la derecha → importa aquí (Paso 📥)</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>TSR + precio acción</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span></td><td><span class="field-read">Fila "Cumulative TSR %" y "Share Price" — solo lectura</span></td></tr>
+          <tr><td>P&L global</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span></td><td><span class="field-read">Selector "View: Global" arriba — compara columnas por equipo</span></td></tr>
+          <tr><td>Equity ratio / deuda</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Balance Sheet</span></span></td><td><span class="field-read">Fila "Equity Ratio %" y "Long-term Debt"</span></td></tr>
+          <tr><td>Cuota de mercado</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span></td><td><span class="field-read">Filtros "Technology" y "Area" — revisa cada combinación</span></td></tr>
+          <tr><td>Demanda insatisfecha</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Demand & Sales</span></span></td><td><span class="field-read">Columna "Unsatisfied Demand" por mercado y tech</span></td></tr>
+          <tr><td>Utilización de planta</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span></td><td><span class="field-read">Columna "Capacity Utilization %" por planta</span></td></tr>
+          <tr><td>Comparativa rivales</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Firm Comparison</span></span></td><td><span class="field-read">Botón <b>XLS</b> (arriba dcha.) → importar en el Paso 📥</span></td></tr>
         </table>
       </div>
       <div class="cards">
@@ -704,13 +723,14 @@
       <div class="inputs-box">
         <h4>📂 Dónde encontrar los datos en Cesim</h4>
         <table class="inputs-table">
-          <tr><td>Outlook de mercado (texto)</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Market Outlook</span></span> — léelo entero, hay eventos macro ocultos</td></tr>
-          <tr><td>Cobertura de red por tecnología</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Network Coverage</span></span> — % cobertura por tech y ronda futura</td></tr>
-          <tr><td>Tasas impositivas por región</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Taxation</span></span></td></tr>
-          <tr><td>Tipos de cambio (EUR, Asia FX)</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Exchange Rates</span></span></td></tr>
-          <tr><td>Costes de transporte e importación</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Logistics</span></span> — tarifas por ruta</td></tr>
-          <tr><td>Coste de componentes / proveedor</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Component Suppliers</span></span></td></tr>
-          <tr><td>Previsión crecimiento de mercado</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Market Size</span></span> — unidades totales por región y tech</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Outlook narrativo</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Market Outlook</span></span></td><td><span class="field-read">Texto libre — léelo completo, hay eventos que cambian parámetros</span></td></tr>
+          <tr><td>Cobertura de red</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Network Coverage</span></span></td><td><span class="field-read">Tabla "% Coverage" por tech y ronda — identifica cuándo llega Tech 2/3</span></td></tr>
+          <tr><td>Tipos impositivos</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Taxation</span></span></td><td><span class="field-read">Columnas "USA / Asia / Europe Tax Rate %" — solo lectura</span></td></tr>
+          <tr><td>Tipos de cambio</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Exchange Rates</span></span></td><td><span class="field-read">Filas EUR/USD y RMB/USD — afectan márgenes en Europa y Asia</span></td></tr>
+          <tr><td>Costes de transporte</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Logistics</span></span></td><td><span class="field-read">Tabla de tarifas por ruta (flat + ad valorem %) — compara rutas</span></td></tr>
+          <tr><td>Coste de componentes</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Component Suppliers</span></span></td><td><span class="field-read">Columna "Unit Cost ($)" por proveedor — input para calcular coste producción</span></td></tr>
+          <tr><td>Tamaño de mercado futuro</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Market Size</span></span></td><td><span class="field-read">Tabla "Total Market (k units)" por región y tech — base para forecast</span></td></tr>
         </table>
       </div>
       <div class="cards">
@@ -760,12 +780,14 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Tamaño total del mercado</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Market Size</span></span> — unidades por región y tech</td></tr>
-          <tr><td>Tasa de crecimiento prevista</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Market Outlook</span></span> + porcentajes en Parameters</td></tr>
-          <tr><td>Tu cuota histórica</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span> — últimas 2–3 rondas</td></tr>
-          <tr><td>Demanda real vs estimada anterior</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Demand & Sales</span></span> — compara tu estimación con lo real</td></tr>
-          <tr><td>Techs disponibles para vender</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Status</span></span> — qué techs tienes ya desarrolladas</td></tr>
-          <tr><td>Precios y features de rivales</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Competitor Info</span></span> — precios, features y promo por equipo</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Tamaño total del mercado</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Market Size</span></span></td><td><span class="field-read">Columna "Total Market (k units)" — úsala como base del forecast</span></td></tr>
+          <tr><td>Tasa de crecimiento</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Market Outlook</span></span></td><td><span class="field-read">% de crecimiento mencionado por región — extráelo del texto narrativo</span></td></tr>
+          <tr><td>Tu cuota histórica</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span></td><td><span class="field-read">Columna con tu equipo — anota las últimas 2 rondas para ver tendencia</span></td></tr>
+          <tr><td>Desviación estimación anterior</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Demand & Sales</span></span></td><td><span class="field-read">Compara "Estimated" vs "Actual" — ajusta tu sesgo en el próximo forecast</span></td></tr>
+          <tr><td>✏️ Estimación de demanda</td><td><span class="nav-path"><span class="seg">Demand</span><span class="arr">›</span><span class="seg">Market Demand</span></span></td><td><span class="field-write">Campo "Market Growth %" por región + "Expected Market Share %" por tech</span></td></tr>
+          <tr><td>✏️ Productos a vender</td><td><span class="nav-path"><span class="seg">Demand</span><span class="arr">›</span><span class="seg">Products to Sell</span></span></td><td><span class="field-write">Checkbox/selector de qué tecnologías ofrecer en cada mercado (máx. 2 por mercado)</span></td></tr>
+          <tr><td>Rivales: precios y features</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Competitor Info</span></span></td><td><span class="field-read">Tabla comparativa — precio, nº features y promo de cada equipo por mercado</span></td></tr>
         </table>
       </div>
       <div class="warning-box">
@@ -827,12 +849,13 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Capacidad disponible por planta</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Plant Information</span></span> — capacidad total y líneas por planta (USA / Asia)</td></tr>
-          <tr><td>Demanda estimada (del paso 2)</td><td>Tu estimación de ventas por tech y mercado — base para decidir volumen de producción</td></tr>
-          <tr><td>Inventario actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Inventory</span></span> — stock disponible del round anterior</td></tr>
-          <tr><td>Coste unitario por planta/tech</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Production Plan</span></span> — se actualiza en tiempo real al asignar capacidad</td></tr>
-          <tr><td>Utilización ronda anterior</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span> — columna "Capacity Utilization %"</td></tr>
-          <tr><td>Proveedor de componentes activo</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Procurement</span></span> — proveedor seleccionado y coste por unidad</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Capacidad disponible</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Plant Information</span></span></td><td><span class="field-read">Fila "Available Capacity (k units)" por planta USA / Asia</span></td></tr>
+          <tr><td>Inventario existente</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Inventory</span></span></td><td><span class="field-read">Columna "Ending Inventory" por tech — réstalo a lo que necesitas producir</span></td></tr>
+          <tr><td>Utilización anterior</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span></td><td><span class="field-read">Columna "Capacity Utilization %" — objetivo 70–90%</span></td></tr>
+          <tr><td>✏️ Unidades a producir</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Production Plan</span></span></td><td><span class="field-write">Campo "Units to Produce" por línea (Tech 1 / Tech 2) en cada planta — el coste unitario se recalcula en tiempo real</span></td></tr>
+          <tr><td>✏️ Outsourcing</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Production Plan</span></span></td><td><span class="field-write">Campo "Contract Manufacturing (k units)" — añade si tu capacidad propia no llega</span></td></tr>
+          <tr><td>✏️ Proveedor de componentes</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Procurement</span></span></td><td><span class="field-write">Dropdown "Select Supplier" por región — elige equilibrando coste, ética y sostenibilidad</span></td></tr>
         </table>
       </div>
       <div class="tip-box">
@@ -900,12 +923,13 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Capacidad actual vs demanda futura</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Plant Information</span></span> + tu forecast de demanda próximas 2 rondas</td></tr>
-          <tr><td>Coste y disponibilidad de plantas</td><td><span class="nav-path"><span class="seg">Investments</span><span class="arr">›</span><span class="seg">Plant Investment</span></span> — precio, capacidad y ronda de disponibilidad</td></tr>
-          <tr><td>Utilización histórica</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span> — ¿estás al límite o con holgura?</td></tr>
-          <tr><td>Nº empleados R&D y salarios</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">Workforce Planning</span></span> — headcount, salario base y presupuesto formación</td></tr>
-          <tr><td>Eficiencia R&D actual</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">HR Results</span></span> — índice de eficiencia del equipo de desarrollo</td></tr>
-          <tr><td>Estructura financiera</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Cash Flow</span></span> — ¿tienes caja suficiente para invertir?</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Capacidad actual</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Plant Information</span></span></td><td><span class="field-read">Fila "Total Capacity (k units)" — compara con tu demanda estimada rondas +1 y +2</span></td></tr>
+          <tr><td>Utilización histórica</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Production</span></span></td><td><span class="field-read">Columna "Capacity Utilization %" — si supera 85% sostenido, plantéate invertir</span></td></tr>
+          <tr><td>Caja disponible para invertir</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Cash Flow</span></span></td><td><span class="field-read">Fila "Cash & Equivalents" — necesitas al menos 2M$ de buffer tras la inversión</span></td></tr>
+          <tr><td>✏️ Inversión en planta</td><td><span class="nav-path"><span class="seg">Investments</span><span class="arr">›</span><span class="seg">Plant Investment</span></span></td><td><span class="field-write">Campo "Investment ($M)" por planta — positivo=ampliar/nueva, negativo=desinvertir. Tarda 1–2 rondas en activarse</span></td></tr>
+          <tr><td>✏️ Empleados R&D</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">Workforce Planning</span></span></td><td><span class="field-write">Campo "Number of R&D Employees" — más empleados = desarrollo más rápido</span></td></tr>
+          <tr><td>✏️ Salario y formación</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">Workforce Planning</span></span></td><td><span class="field-write">Campo "Salary ($)" y "Training Budget ($)" — más alto reduce rotación y sube eficiencia</span></td></tr>
         </table>
       </div>
       <div class="warning-box">
@@ -964,12 +988,13 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Estado de desarrollo por tech</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Development</span></span> — % completado de Tech 2/3/4 y coste restante</td></tr>
-          <tr><td>Cobertura de red futura</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Network Coverage</span></span> — cuándo llegará la cobertura de Tech 2/3</td></tr>
-          <tr><td>Coste de licencias disponibles</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Licensing</span></span> — precio de compra inmediata de cada tech</td></tr>
-          <tr><td>Features desarrolladas</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Product Features</span></span> — nº de features disponibles por tech y coste añadir más</td></tr>
-          <tr><td>R&D de rivales (señales)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Firm Comparison</span></span> — gasto R&D por equipo (o desde el XLS importado)</td></tr>
-          <tr><td>Eficiencia del equipo R&D</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">HR Results</span></span> — afecta a la velocidad de desarrollo in-house</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Estado de desarrollo tech</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Development</span></span></td><td><span class="field-read">Barra "% Completed" y "Remaining Cost ($)" por tech — indica cuánto falta para completar</span></td></tr>
+          <tr><td>Cobertura de red futura</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Network Coverage</span></span></td><td><span class="field-read">Tabla por ronda — asegúrate de terminar R&D al menos 1 ronda antes de la cobertura</span></td></tr>
+          <tr><td>Eficiencia equipo R&D</td><td><span class="nav-path"><span class="seg">HR</span><span class="arr">›</span><span class="seg">HR Results</span></span></td><td><span class="field-read">Índice "R&D Efficiency %" — mayor eficiencia = mismo presupuesto avanza más rápido</span></td></tr>
+          <tr><td>✏️ Inversión R&D in-house</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Development</span></span></td><td><span class="field-write">Campo "R&D Investment ($)" por tecnología (Tech 2 / 3 / 4) — distribuye según prioridad estratégica</span></td></tr>
+          <tr><td>✏️ Compra de licencias</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Technology Licensing</span></span></td><td><span class="field-write">Botón "Buy License" junto al precio — disponible inmediatamente al confirmar</span></td></tr>
+          <tr><td>✏️ Desarrollo de features</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Product Features</span></span></td><td><span class="field-write">Campo "Features to Develop (nº)" por tech — cada feature añade coste unitario en ventas</span></td></tr>
         </table>
       </div>
       <div class="tip-box">
@@ -1037,12 +1062,14 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Precios de rivales por mercado</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Competitor Info</span></span> — precio, features y promo de cada equipo</td></tr>
-          <tr><td>Tu cuota y ventas por mercado</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span> + Demand & Sales</td></tr>
-          <tr><td>Sensibilidad al precio/promo/features</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Elasticities</span></span> — elasticidades por región</td></tr>
-          <tr><td>Features disponibles para ofrecer</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Product Features</span></span> — solo puedes ofrecer las que ya tienes desarrolladas</td></tr>
-          <tr><td>Coste por feature adicional</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Feature Cost</span></span> — coste unitario por cada feature ofrecida</td></tr>
-          <tr><td>Donde introducir precio/promo</td><td><span class="nav-path"><span class="seg">Marketing</span><span class="arr">›</span><span class="seg">Prices & Promotion</span></span> — una fila por producto × mercado (hasta 6 combinaciones)</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Precios de rivales</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Competitor Info</span></span></td><td><span class="field-read">Columna "Selling Price" por equipo y mercado — referencia para fijar el tuyo</span></td></tr>
+          <tr><td>Tu cuota y ventas anteriores</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Market</span><span class="arr">›</span><span class="seg">Market Shares</span></span></td><td><span class="field-read">Tu columna — si subiste precio y perdiste cuota, el mercado es precio-sensitivo</span></td></tr>
+          <tr><td>Elasticidades por región</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Elasticities</span></span></td><td><span class="field-read">Tabla "Price / Promo / Feature Elasticity" por región — Asia más sensible al precio, Europa a features</span></td></tr>
+          <tr><td>Features desarrolladas disponibles</td><td><span class="nav-path"><span class="seg">R&D</span><span class="arr">›</span><span class="seg">Product Features</span></span></td><td><span class="field-read">"Max Features Available" por tech — no puedes ofrecer más de lo que tienes desarrollado</span></td></tr>
+          <tr><td>✏️ Precio de venta</td><td><span class="nav-path"><span class="seg">Marketing</span><span class="arr">›</span><span class="seg">Prices & Promotion</span></span></td><td><span class="field-write">Campo "Selling Price (USD/EUR/RMB)" — una fila por cada combinación producto × mercado</span></td></tr>
+          <tr><td>✏️ Presupuesto de promoción</td><td><span class="nav-path"><span class="seg">Marketing</span><span class="arr">›</span><span class="seg">Prices & Promotion</span></span></td><td><span class="field-write">Campo "Promotion Budget ($k)" — misma tabla, columna junto al precio</span></td></tr>
+          <tr><td>✏️ Features ofrecidas</td><td><span class="nav-path"><span class="seg">Marketing</span><span class="arr">›</span><span class="seg">Prices & Promotion</span></span></td><td><span class="field-write">Campo "Features Offered (nº)" — no puede superar las features desarrolladas en R&D</span></td></tr>
         </table>
       </div>
       <div class="tip-box">
@@ -1110,12 +1137,12 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Margen por mercado/tech</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Contribution Margin</span></span> — margen neto por unidad por mercado y tech</td></tr>
-          <tr><td>Volumen producido disponible</td><td><span class="nav-path"><span class="seg">Production</span><span class="arr">›</span><span class="seg">Production Plan</span></span> — unidades totales disponibles para distribuir</td></tr>
-          <tr><td>Costes de transporte por ruta</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Logistics</span></span> — tarifa plana + ad valorem por ruta</td></tr>
-          <tr><td>Donde configurar prioridades</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Delivery Priorities</span></span> — asigna orden 1º/2º/3º por planta y producto</td></tr>
-          <tr><td>Transfer prices internos</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span> — multiplicador sobre coste (rango 1x–2x) para cada ruta intercompany</td></tr>
-          <tr><td>Beneficio por filial (para tax)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — vista por región (USA / Asia / Europa)</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Margen por mercado y tech</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Operations</span><span class="arr">›</span><span class="seg">Contribution Margin</span></span></td><td><span class="field-read">Columna "Net Margin per Unit" — ordena mercados de mayor a menor para definir prioridad</span></td></tr>
+          <tr><td>Costes de transporte por ruta</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Logistics</span></span></td><td><span class="field-read">Tabla de tarifas — suma flat rate + ad valorem % × precio para coste real por ruta</span></td></tr>
+          <tr><td>Beneficio por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span></td><td><span class="field-read">Selector "Region: USA / Asia / Europe" — compara tax rate × beneficio para decidir transfer price</span></td></tr>
+          <tr><td>✏️ Prioridades de entrega</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Delivery Priorities</span></span></td><td><span class="field-write">Dropdown "Priority 1 / 2 / 3" por planta y producto — el mercado con menor prioridad se corta primero si hay escasez</span></td></tr>
+          <tr><td>✏️ Transfer prices</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span></td><td><span class="field-write">Campo numérico "Multiplier (1.0 – 2.0)" por ruta intercompany — sube si destino tiene menor impuesto</span></td></tr>
         </table>
       </div>
       <div class="tip-box">
@@ -1168,11 +1195,11 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Tipos impositivos por región</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Taxation</span></span> — USA ~38%, Asia ~19%, Europa ~31%</td></tr>
-          <tr><td>Beneficio antes de impuestos por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — selecciona vista por región</td></tr>
-          <tr><td>Transfer prices actuales</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span> — el mismo campo que en el paso 7 (son el mismo input)</td></tr>
-          <tr><td>Pérdidas acumuladas (carryforward)</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span> — fila "Tax Loss Carryforward" por filial</td></tr>
-          <tr><td>Dónde ajustar transfer prices</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span> — rango permitido 1x–2x el coste unitario de producción</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Tipos impositivos por región</td><td><span class="nav-path"><span class="seg">Market Conditions</span><span class="arr">›</span><span class="seg">Parameters</span><span class="arr">›</span><span class="seg">Taxation</span></span></td><td><span class="field-read">Filas "Corporate Tax Rate %" — USA ~38%, Asia ~19%, Europa ~31%</span></td></tr>
+          <tr><td>Beneficio antes impuestos por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span></td><td><span class="field-read">Selector "Region" → fila "Profit Before Tax" — calcula ahorro: diferencia de tax × beneficio desplazado</span></td></tr>
+          <tr><td>Pérdidas acumuladas</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Income Statement</span></span></td><td><span class="field-read">Fila "Tax Loss Carryforward" — si existe, esa filial ya paga menos impuesto de forma natural</span></td></tr>
+          <tr><td>✏️ Transfer prices (= Paso 7)</td><td><span class="nav-path"><span class="seg">Logistics</span><span class="arr">›</span><span class="seg">Transfer Prices</span></span></td><td><span class="field-write">Mismo campo "Multiplier (1.0 – 2.0)" — sube el multiplicador en rutas hacia la filial con menor tax rate</span></td></tr>
         </table>
       </div>
       <div class="tip-box">
@@ -1217,13 +1244,15 @@
       <div class="inputs-box">
         <h4>📂 Inputs necesarios y dónde están</h4>
         <table class="inputs-table">
-          <tr><td>Equity ratio actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span> — "Equity Ratio %" o en Balance Sheet (Equity / Total Assets)</td></tr>
-          <tr><td>Caja disponible por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Balance Sheet</span></span> — "Cash & Equivalents" por región</td></tr>
-          <tr><td>Deuda a largo plazo pendiente</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans</span></span> — saldo vivo, tipo de interés y vencimiento</td></tr>
-          <tr><td>Proyección P&L / Cash Flow</td><td><span class="nav-path"><span class="seg">Projections</span><span class="arr">›</span><span class="seg">Income Statement</span></span> + <span class="nav-path"><span class="seg">Projections</span><span class="arr">›</span><span class="seg">Cash Flow</span></span> — verifica antes de cerrar</td></tr>
-          <tr><td>Precio acción actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span> — "Share Price" (base para calcular impacto de recompras)</td></tr>
-          <tr><td>Donde introducir decisiones</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans & Equity</span></span>: nuevos préstamos, amortización, dividendo y recompra de acciones</td></tr>
-          <tr><td>Préstamos internos entre filiales</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Internal Loans</span></span> — mover caja de Asia/Europa a USA o viceversa</td></tr>
+          <thead><tr><td>Dato</td><td>Dónde está</td><td>Casilla / acción concreta</td></tr></thead>
+          <tr><td>Equity ratio actual</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">KPI Dashboard</span></span></td><td><span class="field-read">Fila "Equity Ratio %" — objetivo 40–60%; fuera de ese rango, actúa antes de pagar dividendos</span></td></tr>
+          <tr><td>Caja disponible por filial</td><td><span class="nav-path"><span class="seg">Results</span><span class="arr">›</span><span class="seg">Financial Statements</span><span class="arr">›</span><span class="seg">Balance Sheet</span></span></td><td><span class="field-read">Fila "Cash & Equivalents" con selector de región — mantén mínimo 2M$ en cada filial</span></td></tr>
+          <tr><td>Deuda pendiente e intereses</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans</span></span></td><td><span class="field-read">Tabla con saldo, tipo de interés y vencimiento — identifica si conviene amortizar anticipadamente</span></td></tr>
+          <tr><td>Verificar proyección antes de cerrar</td><td><span class="nav-path"><span class="seg">Projections</span><span class="arr">›</span><span class="seg">Income Statement</span></span> + <span class="nav-path"><span class="seg">Cash Flow</span></span></td><td><span class="field-read">Revisa que la caja proyectada no sea negativa — si lo es, ajusta deuda o recorta inversión</span></td></tr>
+          <tr><td>✏️ Nuevo préstamo / amortización</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans & Equity</span></span></td><td><span class="field-write">Campo "New Long-term Loan ($)" y "Loan Repayment ($)" — gestiona desde la matriz USA</span></td></tr>
+          <tr><td>✏️ Dividendo por acción</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans & Equity</span></span></td><td><span class="field-write">Campo "Dividend per Share ($)" — impacta directamente el TSR; sé consistente entre rondas</span></td></tr>
+          <tr><td>✏️ Recompra de acciones</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Loans & Equity</span></span></td><td><span class="field-write">Campo "Shares to Repurchase (k)" — mejora EPS; distribúyela en varias rondas para no subir mucho el precio</span></td></tr>
+          <tr><td>✏️ Préstamos internos entre filiales</td><td><span class="nav-path"><span class="seg">Finance</span><span class="arr">›</span><span class="seg">Internal Loans</span></span></td><td><span class="field-write">Campo "Loan Amount ($)" con selector origen/destino — mueve exceso de caja de Asia o Europa a USA</span></td></tr>
         </table>
       </div>
       <div class="tip-box">
