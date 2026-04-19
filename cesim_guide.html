@@ -434,6 +434,39 @@
     }
     .nav-path .arr { color: #2a6a7e; font-size: 0.7rem; }
 
+    /* ── ROUND PLAN ── */
+    .plan-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px; margin-bottom: 28px;
+    }
+    .plan-card {
+      background: #0b1822; border: 1px solid #1e3040;
+      border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .plan-card-head {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .plan-icon { font-size: 1.1rem; }
+    .plan-name { font-weight: 700; font-size: 0.88rem; color: #d0e8f0; flex: 1; }
+    .plan-badge {
+      font-size: 0.67rem; padding: 2px 8px; border-radius: 20px;
+      border: 1px solid; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap;
+    }
+    .plan-metric {
+      font-size: 0.75rem; font-family: monospace; color: #4a8a9a;
+      background: #091520; border-radius: 5px; padding: 3px 9px; align-self: flex-start;
+    }
+    .plan-actions {
+      list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px;
+    }
+    .plan-actions li {
+      font-size: 0.8rem; line-height: 1.5; color: #9ab8c8;
+      padding-left: 14px; position: relative;
+    }
+    .plan-actions li::before {
+      content: "→"; position: absolute; left: 0; color: #2a7a8a;
+    }
+
     .insights-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 12px; margin-bottom: 24px;
@@ -1350,8 +1383,12 @@
         <div class="xls-section-title">📊 Métricas clave detectadas</div>
         <div class="insights-grid" id="kpi-grid"></div>
 
+        <!-- Round Plan -->
+        <div class="xls-section-title">🗺️ Plan de acción — próxima ronda</div>
+        <div id="round-plan"></div>
+
         <!-- Recommendations -->
-        <div class="xls-section-title">🎯 Recomendaciones para la próxima ronda</div>
+        <div class="xls-section-title">📋 Alertas y métricas clave</div>
         <ul class="rec-list" id="rec-list"></ul>
 
         <!-- Competitive Intelligence -->
@@ -1419,6 +1456,7 @@
       buildSheetTabs(wb.SheetNames);
       renderSheet(wb.SheetNames[0]);
       analyzeData();
+      generateRoundPlan();
       analyzeCompetitors();
     };
     reader.readAsArrayBuffer(file);
@@ -1639,6 +1677,234 @@
 
     document.getElementById('rec-list').innerHTML = recs.map(r => `
       <li class="${r.type}"><span class="rec-icon">${r.icon}</span><span>${r.text}</span></li>`).join('');
+  }
+
+  // ── ROUND PLAN ──
+  function generateRoundPlan() {
+    const el = document.getElementById('round-plan');
+    if (!el || !Object.keys(workbookData).length) return;
+
+    // Reuse metric finder
+    const allMetrics = [];
+    Object.entries(workbookData).forEach(([, rows]) => {
+      rows.forEach(row => {
+        const label = String(row[0] || '').trim();
+        if (!label) return;
+        const vals = row.slice(1).map(c => { const n = parseFloat(String(c).replace(/[,%]/g,'')); return isNaN(n) ? null : n; });
+        allMetrics.push({ label: label.toLowerCase(), vals });
+      });
+    });
+    const find = (kws) => allMetrics.find(m => kws.some(k => m.label.includes(k.toLowerCase())));
+    const v0 = (m) => m ? m.vals[0] : null;
+    const v1 = (m) => m ? m.vals[1] : null;
+
+    const sales    = find(['ingresos por ventas','sales revenue']);
+    const ebit     = find(['beneficio operativo (ebit)','operating profit']);
+    const rd       = find(['i+d','r&d','research & development']);
+    const promo    = find(['promoción','promotion','marketing budget']);
+    const featcost = find(['costes de características','feature cost']);
+    const contract = find(['costes de fabricación por contrato','contract manufacturing']);
+    const eqratio  = find(['ratio patrimonio neto','ratio de fondos propios','equity ratio']);
+    const srtrn    = find(['retorno total acumulado del accionista','retorno total acumulado','shareholder return']);
+    const stockpx  = find(['precio de la acción al final de la ronda','precio de la acción al final','share price']);
+    const gmarg    = find(['margen bruto','gross margin']);
+    const stdbt    = find(['deuda a corto','short term','short-term debt']);
+
+    const salesV = v0(sales), salesP = v1(sales);
+    const ebitV  = v0(ebit);
+    const rdV    = v0(rd);
+    const promoV = v0(promo);
+    const featV  = v0(featcost);
+    const contractV = v0(contract);
+    const eqV    = v0(eqratio);
+    const srtrnV = v0(srtrn);
+    const stockV = v0(stockpx);
+    const gmV    = v0(gmarg);
+    const stdbtV = v0(stdbt);
+
+    const ebitPct  = (ebitV  && salesV) ? ebitV/salesV*100  : null;
+    const rdPct    = (rdV    && salesV) ? rdV/salesV*100    : null;
+    const promoPct = (promoV && salesV) ? promoV/salesV*100 : null;
+    const featPct  = (featV  && salesV) ? featV/salesV*100  : null;
+    const salesGrowth = (salesV && salesP && salesP !== 0) ? (salesV-salesP)/Math.abs(salesP)*100 : null;
+
+    // ── Build plan per step ──
+    const plan = [];
+
+    // Step 1 — Market Conditions (always informative)
+    plan.push({
+      num:1, icon:'🌍', name:'Market Conditions', priority:'info',
+      metric: null,
+      actions:[
+        'Lee el Market Outlook completo antes de cualquier otra decisión — puede haber cambios en FX, aranceles o cobertura de red que alteren tu estrategia',
+        'Anota los tipos impositivos por región (Parameters › Taxation) — los necesitarás en Tax Planning',
+        'Revisa si hay cambios en costes de transporte y en la cobertura de red de Tech 2/3 — afectan a Logistics y R&D'
+      ]
+    });
+
+    // Step 2 — Demand
+    const demAct = [], demKpi = [];
+    let demPrio = 'good';
+    if (salesGrowth !== null) {
+      if (salesGrowth < -5) {
+        demAct.push(`Ventas cayeron ${Math.abs(salesGrowth).toFixed(1)}% — baja tu estimación de cuota y revisa si el precio está por encima del mercado`);
+        demPrio = 'bad'; demKpi.push(`Ventas: ${salesGrowth.toFixed(1)}%`);
+      } else if (salesGrowth > 10) {
+        demAct.push(`Crecimiento sólido del ${salesGrowth.toFixed(1)}% — mantén o sube ligeramente la estimación de cuota; el mercado responde bien a tu propuesta`);
+        demKpi.push(`Ventas: +${salesGrowth.toFixed(1)}%`);
+      } else {
+        demAct.push(`Ventas estables (${salesGrowth > 0 ? '+' : ''}${salesGrowth.toFixed(1)}%) — ajusta el forecast con el crecimiento esperado del outlook sin cambios drásticos`);
+        demKpi.push(`Ventas: ${salesGrowth > 0 ? '+' : ''}${salesGrowth.toFixed(1)}%`);
+      }
+    }
+    demAct.push('Revisa la columna "Unsatisfied Demand" (Results › Market › Demand & Sales) — si hay demanda insatisfecha, estabas subestimando; si hay exceso de inventario, sobreestimando');
+    demAct.push('Máximo 2 productos por mercado: decide ahora si añades Tech 2 a algún mercado o mantienes solo Tech 1');
+    plan.push({ num:2, icon:'📉', name:'Demand', priority:demPrio, metric: demKpi[0]||null, actions:demAct });
+
+    // Step 3 — Production
+    const prodAct = [];
+    let prodPrio = 'good';
+    if (contractV && contractV > 0) {
+      prodAct.push(`Usaste outsourcing (${fmtM(contractV)}) — evalúa si la demanda próxima ronda sigue justificándolo o si ampliar planta propia es más rentable (mejor curva de aprendizaje)`);
+      prodPrio = 'warn';
+    }
+    if (ebitPct !== null && ebitPct < 12) {
+      prodAct.push(`Margen EBIT bajo (${ebitPct.toFixed(1)}%): revisa la utilización de planta en Results › Operations › Production. Si está por debajo del 70% o por encima del 90%, los costes unitarios están subiendo`);
+      prodPrio = 'bad';
+    } else if (ebitPct !== null && ebitPct >= 12) {
+      prodAct.push(`Margen EBIT de ${ebitPct.toFixed(1)}% — revisa que la utilización esté en el rango 70–90% para mantener el coste unitario bajo`);
+    }
+    prodAct.push('Asigna primero la capacidad a la tech con mayor margen; usa outsourcing solo para cubrir picos de demanda que superen tu planta propia');
+    plan.push({ num:3, icon:'🏭', name:'Production', priority:prodPrio, metric: ebitPct ? `EBIT: ${ebitPct.toFixed(1)}%` : null, actions:prodAct });
+
+    // Step 4 — Investments & HR
+    const invAct = [];
+    let invPrio = 'info';
+    if (salesGrowth !== null && salesGrowth > 15) {
+      invAct.push(`Crecimiento del ${salesGrowth.toFixed(1)}% — proyecta la demanda 2 rondas adelante. Si vas a superar tu capacidad, decide AHORA: una planta nueva tarda 1–2 rondas en activarse`);
+      invPrio = 'warn';
+    } else if (contractV && contractV > 0) {
+      invAct.push('Estás usando outsourcing de forma recurrente — si la demanda se consolida, puede ser el momento de invertir en planta propia para mejorar la curva de aprendizaje');
+      invPrio = 'warn';
+    } else {
+      invAct.push('Con el crecimiento actual, monitoriza la utilización de planta. Si se acerca al 85–90% de forma sostenida, planifica la inversión con antelación');
+    }
+    if (rdPct === 0 || rdV === 0) {
+      invAct.push('R&D = 0 → considera aumentar el equipo I+D en HR (más empleados, mejor salario) para estar listo cuando empieces a invertir en Tech 2');
+      invPrio = 'warn';
+    } else {
+      invAct.push('Asegúrate de que el equipo I+D (HR › Workforce) tiene el headcount y salario adecuados — la eficiencia R&D impacta directamente la velocidad de desarrollo');
+    }
+    plan.push({ num:4, icon:'🏗️', name:'Investments & HR', priority:invPrio, metric: contractV && contractV > 0 ? `Outsourcing: ${fmtM(contractV)}` : null, actions:invAct });
+
+    // Step 5 — R&D
+    const rdAct = [];
+    let rdPrio = 'good';
+    if (!rdV || rdV === 0) {
+      rdAct.push('⚠️ R&D = 0 esta ronda. Empieza a invertir en Tech 2 ahora mismo — los competidores que lo hagan antes tendrán acceso al mercado antes que tú cuando llegue la cobertura de red');
+      rdPrio = 'bad';
+    } else if (rdPct !== null && rdPct < 5) {
+      rdAct.push(`R&D solo ${rdPct.toFixed(1)}% de ventas (referencia del sector: ~10%) — insuficiente para mantenerse competitivo. Aumenta el presupuesto gradualmente ya que el desarrollo tarda 1 ronda`);
+      rdPrio = 'warn';
+    } else {
+      rdAct.push(`R&D en ${rdPct.toFixed(1)}% de ventas — verifica el % completado de cada tech en R&D › Technology Development para saber cuánto falta y si necesitas comprar alguna licencia`);
+    }
+    if (featPct !== null && featPct > 6) {
+      rdAct.push(`Alta inversión en features (${featPct.toFixed(1)}% ventas) — asegúrate de que las features que ofreces en Marketing coinciden con las que tienes desarrolladas; y que Europa (la región más sensible) te lo está reconociendo en cuota`);
+    } else {
+      rdAct.push('Considera desarrollar más features si Europa es mercado clave para ti — es la región más sensible a features y pueden justificar un precio premium');
+    }
+    plan.push({ num:5, icon:'🔬', name:'R&D', priority:rdPrio, metric: rdPct !== null ? `R&D: ${rdPct.toFixed(1)}% ventas` : 'R&D: 0', actions:rdAct });
+
+    // Step 6 — Marketing
+    const mktAct = [];
+    let mktPrio = 'good';
+    if (promoPct !== null && promoPct < 2) {
+      mktAct.push(`Promoción muy baja (${promoPct.toFixed(1)}% ventas) — en USA y Europa la publicidad tiene alto impacto en cuota. Aumenta al 3–5% como mínimo`);
+      mktPrio = 'warn';
+    } else if (promoPct !== null && promoPct > 6) {
+      mktAct.push(`Promoción alta (${promoPct.toFixed(1)}%) — verifica si ganaste cuota proporcional. Si no, el problema puede ser el precio o la tech: publicidad no compensa una tech obsoleta o precio fuera de mercado`);
+    } else if (promoPct !== null) {
+      mktAct.push(`Promoción en rango razonable (${promoPct.toFixed(1)}%) — mantén y ajusta por mercado: más en USA (responde bien a publicidad), menos en Asia (responde más al precio)`);
+    }
+    if (ebitPct !== null && ebitPct > 20) {
+      mktAct.push(`Margen EBIT alto (${ebitPct.toFixed(1)}%) — tienes margen para ser más agresivo en precio o publicidad. Considera bajar ligeramente el precio en Asia para ganar volumen`);
+    } else if (ebitPct !== null && ebitPct < 10) {
+      mktAct.push('Margen bajo — prioriza subir precio (especialmente en Europa/USA) antes de subir publicidad. La elasticidad al precio es menor en esos mercados');
+      mktPrio = mktPrio === 'good' ? 'warn' : mktPrio;
+    }
+    mktAct.push('Fija precios diferenciados: Europa → precio premium (sensible a features), Asia → precio competitivo (sensible al precio), USA → equilibrio con publicidad alta');
+    plan.push({ num:6, icon:'📣', name:'Marketing', priority:mktPrio, metric: promoPct !== null ? `Promo: ${promoPct.toFixed(1)}% ventas` : null, actions:mktAct });
+
+    // Step 7 — Logistics
+    const logAct = [];
+    logAct.push('Ordena prioridades de entrega por margen neto por unidad (Results › Operations › Contribution Margin) — el mercado con menor margen va el último; si hay escasez, se corta primero');
+    if (contractV && contractV > 0) {
+      logAct.push('Con outsourcing activo, coordina los transfer prices para mover beneficios hacia la filial con menor tipo impositivo (normalmente Asia)');
+    } else {
+      logAct.push('Revisa si los costes de transporte USA→Asia están comiendo el margen. Si es así, considera producir más en Asia localmente');
+    }
+    logAct.push('Ajusta el Transfer Price Multiplier (rango 1x–2x) en Logistics › Transfer Prices para desplazar beneficios hacia Asia donde el impuesto es menor');
+    plan.push({ num:7, icon:'🚚', name:'Logistics', priority:'info', metric:null, actions:logAct });
+
+    // Step 8 — Tax Planning
+    const taxAct = [];
+    let taxPrio = 'info';
+    if (ebitV && ebitV > 0) {
+      const saving = (ebitV * 0.19).toFixed(0); // rough estimate
+      taxAct.push(`Con EBIT de ${fmtM(ebitV)}, optimizar transfer prices puede ahorrarte un importe relevante. Usa multiplicador 1.8–2.0 en rutas hacia Asia (tax ~19%) desde regiones con mayor tax`);
+      taxPrio = 'warn';
+    } else {
+      taxAct.push('Ajusta el Transfer Price Multiplier en rutas hacia Asia — es la región con menor tipo impositivo (~19% vs USA ~38%)');
+    }
+    taxAct.push('Verifica en Results › Financial Statements › Income Statement (vista por región) si alguna filial tiene pérdidas acumuladas (Tax Loss Carryforward) — no tiene sentido mover beneficios hacia ella');
+    taxAct.push('Coordina este paso con Logistics (paso 7) — el campo de Transfer Prices es el mismo en ambos');
+    plan.push({ num:8, icon:'🧾', name:'Tax Planning', priority:taxPrio, metric: ebitV ? `EBIT: ${fmtM(ebitV)}` : null, actions:taxAct });
+
+    // Step 9 — Finance
+    const finAct = [];
+    let finPrio = 'good';
+    if (stdbtV && stdbtV > 0) {
+      finAct.push(`⚠️ Tienes deuda a corto plazo (${fmtM(stdbtV)}) — es la más cara. Refinancia con deuda a largo plazo antes de pagar dividendos o hacer recompras`);
+      finPrio = 'bad';
+    }
+    if (eqV !== null) {
+      if (eqV > 65) {
+        finAct.push(`Equity ratio alto (${eqV.toFixed(0)}%) — demasiado capital propio. Aumenta el dividendo o lanza una recompra de acciones para mejorar el TSR y aprovechar el tax shield de la deuda`);
+        finPrio = finPrio === 'good' ? 'warn' : finPrio;
+      } else if (eqV < 35) {
+        finAct.push(`Equity ratio bajo (${eqV.toFixed(0)}%) — muy apalancado. Amortiza deuda antes de pagar dividendos; tienes poca flexibilidad si hay un shock de demanda`);
+        finPrio = 'bad';
+      } else {
+        finAct.push(`Equity ratio óptimo (${eqV.toFixed(0)}%) — estructura sana. Considera una recompra gradual de acciones para mejorar EPS sin comprometer la solidez financiera`);
+      }
+    }
+    if (srtrnV !== null && srtrnV === 0) {
+      finAct.push('Ronda inicial: establece ya una política de dividendos consistente — el mercado premia la predictibilidad y mejora el precio de la acción');
+    } else if (srtrnV !== null && srtrnV > 15) {
+      finAct.push(`TSR de ${srtrnV.toFixed(1)}% — excelente. Mantén la política financiera y usa el exceso de caja en recompras graduales para sostener el precio de la acción`);
+    } else if (srtrnV !== null && srtrnV < 5 && srtrnV > 0) {
+      finAct.push(`TSR bajo (${srtrnV.toFixed(1)}%) — prioriza mejorar el precio de la acción: más rentabilidad operativa (EBIT) + dividendo atractivo + recompra de acciones gradual`);
+      finPrio = finPrio === 'good' ? 'warn' : finPrio;
+    }
+    finAct.push('Antes de cerrar la ronda: verifica en Projections › Cash Flow que la caja no queda negativa después de todas tus decisiones financieras');
+    plan.push({ num:9, icon:'💰', name:'Finance & Budgets', priority:finPrio,
+      metric: eqV ? `Equity ratio: ${eqV.toFixed(0)}%` : srtrnV !== null ? `TSR: ${srtrnV.toFixed(1)}%` : null, actions:finAct });
+
+    // ── Render ──
+    const prioColor = { bad:'#e05a5a', warn:'#c8a22a', good:'#4ec94e', info:'#14a8c0' };
+    const prioLabel = { bad:'🔴 Actuar ya', warn:'🟡 Revisar', good:'🟢 Mantener', info:'🔵 Informativo' };
+
+    el.innerHTML = `<div class="plan-grid">${plan.map(s => `
+      <div class="plan-card" style="border-top:3px solid ${prioColor[s.priority]}">
+        <div class="plan-card-head">
+          <span class="plan-icon">${s.icon}</span>
+          <span class="plan-name">Paso ${s.num} · ${s.name}</span>
+          <span class="plan-badge" style="color:${prioColor[s.priority]};border-color:${prioColor[s.priority]}55;background:${prioColor[s.priority]}14">${prioLabel[s.priority]}</span>
+        </div>
+        ${s.metric ? `<div class="plan-metric">${s.metric}</div>` : ''}
+        <ul class="plan-actions">${s.actions.map(a=>`<li>${a}</li>`).join('')}</ul>
+      </div>`).join('')}</div>`;
   }
 
   // ── COMPETITOR ANALYSIS ──
